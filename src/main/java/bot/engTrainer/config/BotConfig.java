@@ -1,4 +1,4 @@
-package bot.engtrainer;
+package bot.engTrainer.config;
 
 import com.github.kshashov.telegram.config.TelegramBotGlobalProperties;
 import com.github.kshashov.telegram.config.TelegramBotGlobalPropertiesConfiguration;
@@ -33,8 +33,6 @@ public class BotConfig implements TelegramBotGlobalPropertiesConfiguration {
                             .useWebhook(new SetWebhook().url(webhook_path));
                 })
                 ;
-
-
 
     }
 
