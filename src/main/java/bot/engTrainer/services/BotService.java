@@ -36,6 +36,10 @@ public class BotService {
     private final ScenarioService scenarioService;
     private final UserStackRepository userStackRepository;
 
+    final String msg_settings = "Settings";
+    final String msg_select_dictionary = "Select dictionary";
+    final String msg_start_training = "Start training";
+
     private Chat currentChat;
 
     public Chat getCurrentChat() {

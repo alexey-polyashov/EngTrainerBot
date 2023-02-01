@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.Columns;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -35,6 +36,14 @@ public class BotUser {
     @Column
     @ColumnDefault("false")
     private Boolean blocked = false;
+
+    @Column(name = "start_hour")
+    @ColumnDefault("0")
+    private int startHour;
+
+    @Column(name = "end_hour")
+    @ColumnDefault("0")
+    private int endHour;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
