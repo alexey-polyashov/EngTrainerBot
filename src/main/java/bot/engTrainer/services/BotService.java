@@ -1,6 +1,7 @@
 package bot.engTrainer.services;
 
 import bot.engTrainer.botScenarios.CommonScenario;
+import bot.engTrainer.botScenarios.MainMenuScenario;
 import bot.engTrainer.botScenarios.SimpleScManagerConfig;
 import bot.engTrainer.botScenarios.StageParams;
 import bot.engTrainer.entities.BotUser;
@@ -13,6 +14,9 @@ import com.github.kshashov.telegram.api.TelegramRequest;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.Message;
+import com.pengrad.telegrambot.model.request.Keyboard;
+import com.pengrad.telegrambot.model.request.KeyboardButton;
+import com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup;
 import com.pengrad.telegrambot.request.SendMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,10 +39,6 @@ public class BotService {
     private final BotUserService botUserService;
     private final ScenarioService scenarioService;
     private final UserStackRepository userStackRepository;
-
-    final String msg_settings = "Settings";
-    final String msg_select_dictionary = "Select dictionary";
-    final String msg_start_training = "Start training";
 
     private Chat currentChat;
 
@@ -120,19 +120,12 @@ public class BotService {
                 sc.doWork(p);
                 checkScenStack();
                 return;
-            }else if(opt.equals("cmd")){
-                if(fullMes.text().equals("/myservices")){
-                    Scenario<String, StageParams> sc = startScenario("ServiceSelectScenario", currentChat);
-                    StageParams p = StageParams.builder().bot(bot).chat(chat).message(fullMes).request(request).build();
-                    sc.doWork(p);
-                    checkScenStack();
-                    return;
-                }
-            }
-            else{
-                bot.execute(new SendMessage(chat.id(), "Здравствуйте!"));
-                bot.execute(new SendMessage(chat.id(), "Я бот компании Спецобъединение \"Северо-Запад\""));
-                bot.execute(new SendMessage(chat.id(), "Я пока ничего не умею, но скоро меня научат"));
+            }else{
+                Scenario<String, StageParams> sc = scenarioStack.peek();
+                StageParams p = StageParams.builder().bot(bot).chat(chat).message(fullMes).request(request).build();
+                sc.doWork(p);
+                checkScenStack();
+                return;
             }
         }else{
             Scenario<String, StageParams> sc = scenarioStack.peek();

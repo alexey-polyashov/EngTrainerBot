@@ -11,6 +11,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "bot_users")
@@ -37,6 +38,10 @@ public class BotUser {
     @ColumnDefault("false")
     private Boolean blocked = false;
 
+    @Column(name = "words_count")
+    @ColumnDefault("0")
+    private int wordsCount;
+
     @Column(name = "start_hour")
     @ColumnDefault("0")
     private int startHour;
@@ -44,6 +49,16 @@ public class BotUser {
     @Column(name = "end_hour")
     @ColumnDefault("0")
     private int endHour;
+
+    @ManyToMany
+    @JoinTable(name="select_dict",
+            joinColumns=    @JoinColumn(name="user_id", referencedColumnName="id"),
+            inverseJoinColumns=
+            @JoinColumn(name="dict_id", referencedColumnName="id"))
+    private Set<Dictionaries> selectDictionaries;
+
+    @OneToMany(mappedBy="bot_user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<TrainingProgress> trainingProgress;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

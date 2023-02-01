@@ -28,10 +28,10 @@ public class Dictionaries {
     private String name;
 
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name="Dict_Words",
-            joinColumns=    @JoinColumn(name="Dict_id", referencedColumnName="id"),
+    @JoinTable(name="dict_words",
+            joinColumns=    @JoinColumn(name="dict_id", referencedColumnName="id"),
             inverseJoinColumns=
-            @JoinColumn(name="Word_id", referencedColumnName="id"))
+            @JoinColumn(name="word_id", referencedColumnName="id"))
     Set<Words> words;
     
     @Column(name = "marked")

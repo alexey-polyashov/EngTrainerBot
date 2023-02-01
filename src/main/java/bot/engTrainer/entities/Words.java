@@ -22,16 +22,16 @@ public class Words {
     @Column(name = "id")
     private Long id;
 
-    @Column
-    private String foreign_write;
+    @Column(name="foreign_write")
+    private String foreignWrite;
 
     @Column
     private String transcription;
 
-    @Column
-    private String native_write;
+    @Column(name="native_write")
+    private String nativeWrite;
 
-    @ManyToMany(mappedBy="words")
+    @ManyToMany(mappedBy="dictionaries")
     private List<Dictionaries> dictionaries;
 
 }

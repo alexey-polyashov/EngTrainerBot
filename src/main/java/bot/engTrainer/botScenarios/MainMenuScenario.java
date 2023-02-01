@@ -8,20 +8,29 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Chat;
+import com.pengrad.telegrambot.model.request.Keyboard;
+import com.pengrad.telegrambot.model.request.KeyboardButton;
+import com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup;
 import com.pengrad.telegrambot.request.SendMessage;
 
 import java.util.HashMap;
 import java.util.Map;
 
 
-public class NewUserConnectedScenario extends CommonScenario<String, StageParams> {
+public class MainMenuScenario extends CommonScenario<String, StageParams> {
 
     private ScenarioService scenarioService;
     private BotService botService;
 
-    public NewUserConnectedScenario() {
+    public static final String msg_settings = "Settings";
+    public static final String msg_settings_cmd = "/settings";
+    public static final String msg_select_dictionary = "Select dictionary";
+    public static final String msg_select_dictionary_cmd = "/dictionary";
+    public static final String msg_start_training = "Start training";
+    public static final String msg_start_training_cmd = "/training";
+    public MainMenuScenario() {
         super();
-        setScenarioId("NewUserConnectedScenario");
+        setScenarioId("MainMenuScenario");
     }
 
     public void setScenarioService(ScenarioService scenarioService){
@@ -38,8 +47,17 @@ public class NewUserConnectedScenario extends CommonScenario<String, StageParams
         SimpleScenarioStage<String, StageParams> st1 = new SimpleScenarioStage<>("1", (p) -> {
             Chat chat = p.getChat();
             TelegramBot bot = p.getBot();
-            bot.execute(new SendMessage(chat.id(), "Добро пожаловать в чат для тренировки английского!"));
-            bot.execute(new SendMessage(chat.id(), "Для начала необходимо пройти простую процедуру регистрации!"));
+
+
+            Keyboard keyboard = new ReplyKeyboardMarkup(
+                    new KeyboardButton(msg_start_training),
+                    new KeyboardButton(msg_select_dictionary),
+                    new KeyboardButton(msg_settings))
+                    .oneTimeKeyboard(true)   // optional
+                    .resizeKeyboard(true)    // optional
+                    .selective(true);        // optional
+            bot.execute(new SendMessage(chat.id(),"").replyMarkup(keyboard));
+
             return "2";
         });
 
@@ -47,25 +65,24 @@ public class NewUserConnectedScenario extends CommonScenario<String, StageParams
             //if something wrong, return here
             Chat chat = p.getChat();
             TelegramBot bot = p.getBot();
-            bot.execute(new SendMessage(chat.id(), "Введите свое имя, как к вам можно обращаться"));
-            return "3";
-        });
+            String mes = p.getMessage().text();
 
-        SimpleScenarioStage<String, StageParams> st3 = new SimpleScenarioStage<>("3", (p) -> {
-            Chat chat = p.getChat();
-            TelegramBot bot = p.getBot();
-            bot.execute(new SendMessage(chat.id(), "Выполняю регистрацию нового пользователя ..."));
-            //ToDo
-            //register new user
+            if(mes.equals(msg_settings) || mes.equals(msg_settings_cmd)){
+                bot.execute(new SendMessage(chat.id(), "Настройки"));
+                return null;
+            }else if(mes.equals(msg_select_dictionary) || mes.equals(msg_select_dictionary_cmd)){
+                bot.execute(new SendMessage(chat.id(), "Выбор словарей для изучения"));
+                return null;
+            }else if(mes.equals(msg_start_training) || mes.equals(msg_start_training_cmd)){
+                bot.execute(new SendMessage(chat.id(), "Тренировка начинается"));
+                return null;
+            }
+
             return null;
-            //if something went wrong, you need to use:
-            //  bot.execute(new SendMessage(chat.id(), "Повторите ввод."));
-            //  return "2";
         });
 
         addStage(st1);
         addStage(st2);
-        addStage(st3);
 
     }
 
