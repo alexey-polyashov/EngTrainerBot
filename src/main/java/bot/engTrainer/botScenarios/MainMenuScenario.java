@@ -22,12 +22,16 @@ public class MainMenuScenario extends CommonScenario<String, StageParams> {
     private ScenarioService scenarioService;
     private BotService botService;
 
-    public static final String msg_settings = "Settings";
-    public static final String msg_settings_cmd = "/settings";
-    public static final String msg_select_dictionary = "Select dictionary";
-    public static final String msg_select_dictionary_cmd = "/dictionary";
-    public static final String msg_start_training = "Start training";
-    public static final String msg_start_training_cmd = "/training";
+    static final String msg_settings = "Settings";
+    static final String msg_settings_cmd = "/settings";
+    static final String msg_select_dictionary = "Select dictionary";
+    static final String msg_select_dictionary_cmd = "/dictionary";
+    static final String msg_start_training = "Start training";
+    static final String msg_start_training_cmd = "/training";
+
+    static final String msg_settings_training_time = "Intervals";
+    static final String msg_settings_training_time_cmd = "/intervals";
+
     public MainMenuScenario() {
         super();
         setScenarioId("MainMenuScenario");
@@ -48,7 +52,6 @@ public class MainMenuScenario extends CommonScenario<String, StageParams> {
             Chat chat = p.getChat();
             TelegramBot bot = p.getBot();
 
-
             Keyboard keyboard = new ReplyKeyboardMarkup(
                     new KeyboardButton(msg_start_training),
                     new KeyboardButton(msg_select_dictionary),
@@ -68,17 +71,46 @@ public class MainMenuScenario extends CommonScenario<String, StageParams> {
             String mes = p.getMessage().text();
 
             if(mes.equals(msg_settings) || mes.equals(msg_settings_cmd)){
-                bot.execute(new SendMessage(chat.id(), "Настройки"));
-                return null;
+                bot.execute(new SendMessage(chat.id(), "Вы вошли в настройки."));
+                bot.execute(new SendMessage(chat.id(), "Выберите в меню пункт для настроек"));
+                return "3";
             }else if(mes.equals(msg_select_dictionary) || mes.equals(msg_select_dictionary_cmd)){
-                bot.execute(new SendMessage(chat.id(), "Выбор словарей для изучения"));
-                return null;
+                bot.execute(new SendMessage(chat.id(), "Вы вошли в меню выбора словарей. Выберите аункт в меню для настройки словарей"));
+                return "4";
             }else if(mes.equals(msg_start_training) || mes.equals(msg_start_training_cmd)){
                 bot.execute(new SendMessage(chat.id(), "Тренировка начинается"));
-                return null;
+                return "5";
+            }else{
+                bot.execute(new SendMessage(chat.id(), "Я вас не понимаю. Выберите пункт меню и действуюте по инструкциям."));
+                goToStage("1");
+                doWork(p);
+                return "1";
             }
 
-            return null;
+        });
+
+        SimpleScenarioStage<String, StageParams> st3 = new SimpleScenarioStage<>("3", (p) -> {
+            //if something wrong, return here
+            Chat chat = p.getChat();
+            TelegramBot bot = p.getBot();
+            String mes = p.getMessage().text();
+
+            if(mes.equals(msg_settings) || mes.equals(msg_settings_cmd)){
+                bot.execute(new SendMessage(chat.id(), "Выберите в меню пункт для настроек"));
+                return "3";
+            }else if(mes.equals(msg_select_dictionary) || mes.equals(msg_select_dictionary_cmd)){
+                bot.execute(new SendMessage(chat.id(), "Вы вошли в меню выбора словарей. Выберите аункт в меню для настройки словарей"));
+                return "4";
+            }else if(mes.equals(msg_start_training) || mes.equals(msg_start_training_cmd)){
+                bot.execute(new SendMessage(chat.id(), "Тренировка начинается"));
+                return "5";
+            }else{
+                bot.execute(new SendMessage(chat.id(), "Я вас не понимаю. Выберите пункт меню и действуюте по инструкциям."));
+                goToStage("1");
+                doWork(p);
+                return "1";
+            }
+
         });
 
         addStage(st1);

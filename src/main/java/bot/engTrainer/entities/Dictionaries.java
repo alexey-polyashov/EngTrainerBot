@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.*;
-import org.springframework.context.annotation.Lazy;
 
 import javax.persistence.*;
 import javax.persistence.Entity;
@@ -19,20 +18,22 @@ import java.util.Set;
 @NoArgsConstructor
 public class Dictionaries {
 
+    @Id
+    @Column(name = "id")
+    private Long id;
+
+    @Column(name = "name")
+    private String name;
 
     @Column
     private String description;
-
-    @Id
-    @Column(name = "name")
-    private String name;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name="dict_words",
             joinColumns=    @JoinColumn(name="dict_id", referencedColumnName="id"),
             inverseJoinColumns=
             @JoinColumn(name="word_id", referencedColumnName="id"))
-    Set<Words> words;
+    Set<Words> dictWords;
     
     @Column(name = "marked")
     @ColumnDefault("false")

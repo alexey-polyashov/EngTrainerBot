@@ -31,7 +31,10 @@ public class Words {
     @Column(name="native_write")
     private String nativeWrite;
 
-    @ManyToMany(mappedBy="dictionaries")
+    @Column
+    private String description;
+
+    @ManyToMany
     private List<Dictionaries> dictionaries;
 
 }

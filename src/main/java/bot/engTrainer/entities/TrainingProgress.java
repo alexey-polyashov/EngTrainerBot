@@ -19,10 +19,10 @@ public class TrainingProgress {
     @Column(name = "id")
     private Long id;
 
-    @OneToMany(mappedBy = "bot_user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<BotUser> comments=new ArrayList<>();
+    @Column(name="user_id")
+    private Long userId;
 
-    @Column
+    @ManyToOne(fetch = FetchType.EAGER)
     private Words word;
 
     @Column

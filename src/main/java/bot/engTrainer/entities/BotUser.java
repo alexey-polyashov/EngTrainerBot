@@ -57,7 +57,8 @@ public class BotUser {
             @JoinColumn(name="dict_id", referencedColumnName="id"))
     private Set<Dictionaries> selectDictionaries;
 
-    @OneToMany(mappedBy="bot_user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "user_id")
     private Set<TrainingProgress> trainingProgress;
 
     @Id
