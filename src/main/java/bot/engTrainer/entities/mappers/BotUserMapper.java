@@ -2,6 +2,7 @@ package bot.engTrainer.entities.mappers;
 
 import bot.engTrainer.entities.BotUser;
 import bot.engTrainer.entities.dto.BotUserDto;
+import bot.engTrainer.entities.dto.BotUserSimpleDto;
 import bot.engTrainer.entities.dto.BotUserUpdateDto;
 import bot.engTrainer.entities.dto.NewBotUserDto;
 import bot.engTrainer.services.BotUserService;
@@ -18,5 +19,6 @@ public interface BotUserMapper {
     BotUser copy(BotUser botUserSource, BotUserUpdateDto botUserUpdate);
     BotUser toModel(BotUserUpdateDto dto);
     BotUserDto toDto(BotUser botUser);
+    BotUserSimpleDto toSimpleDto(BotUser botUser);
 
 }

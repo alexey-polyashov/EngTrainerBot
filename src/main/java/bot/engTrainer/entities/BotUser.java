@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.Columns;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -38,17 +37,9 @@ public class BotUser {
     @ColumnDefault("false")
     private Boolean blocked = false;
 
-    @Column(name = "words_count")
+    @Column(name = "intensity")
     @ColumnDefault("0")
-    private int wordsCount;
-
-    @Column(name = "start_hour")
-    @ColumnDefault("0")
-    private int startHour;
-
-    @Column(name = "end_hour")
-    @ColumnDefault("0")
-    private int endHour;
+    private int intensity;
 
     @ManyToMany
     @JoinTable(name="select_dict",
@@ -60,6 +51,10 @@ public class BotUser {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "user_id")
     private Set<TrainingProgress> trainingProgress;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "user_id")
+    private Set<TrainingIntervals> trainingIntervals;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

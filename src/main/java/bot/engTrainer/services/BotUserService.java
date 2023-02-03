@@ -2,6 +2,7 @@ package bot.engTrainer.services;
 
 import bot.engTrainer.entities.BotUser;
 import bot.engTrainer.entities.Roles;
+import bot.engTrainer.entities.TrainingIntervals;
 import bot.engTrainer.entities.dto.BotUserDto;
 import bot.engTrainer.entities.dto.BotUserUpdateDto;
 import bot.engTrainer.entities.dto.NewBotUserDto;
@@ -13,12 +14,12 @@ import bot.engTrainer.repository.RoleRepository;
 import com.pengrad.telegrambot.model.Chat;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,29 +33,65 @@ public class BotUserService {
 
 
     public BotUser getUserByString(String identifier){
-        log.info("getUser: user id - {}", identifier);
-        return getUser(identifier, new Chat())
+        return getUser(identifier)
                 .orElseThrow(()->new ResourceNotFound("Пользователь с логином или email '" + identifier + "' не найден в базе"));
     }
 
-    public Optional<BotUser> getUser(String identifier, Chat chat){
-        log.info("chat:{}, getUser: user id - {}", chat.id(), identifier);
+    public Optional<BotUser> getUser(String identifier){
         Optional<BotUser> botUser = botUserRepository.findByName(identifier);
         if(botUser.isEmpty()){
-            log.info("chat:{}, getUser: user id - {}, don't find by name", chat.id(), identifier);
             botUser = botUserRepository.findByEmail(identifier);
         }
         return botUser;
     }
 
     public Optional<BotUser> getUserByChat(Chat chat){
-        log.info("chat:{}, getUserByChat", chat.id());
-        Optional<BotUser> botUser = botUserRepository.findByChatId(chat.id());
-        if(botUser.isEmpty()){
-            log.info("chat:{}, getUserByChat, don't find", chat.id());
-        }
-        return botUser;
+        return botUserRepository.findByChatId(chat.id());
     }
+
+    @Transactional
+    public Set<TrainingIntervals> getUserTrainingIntervals(Chat chat){
+        BotUser botUser = botUserRepository.findByChatId(chat.id())
+                .orElseThrow(()->new ResourceNotFound("Пользователь с id '" + chat.id() + "' не найден"));
+        return botUser.getTrainingIntervals();
+    }
+
+    @Transactional
+    public void addUserTrainingIntervals(Chat chat, int hour){
+        BotUser botUser = botUserRepository.findByChatId(chat.id())
+                .orElseThrow(()->new ResourceNotFound("Пользователь с id '" + chat.id() + "' не найден"));
+        for (TrainingIntervals interval:botUser.getTrainingIntervals()){
+            if(interval.getStartHour()==hour) return;
+        }
+        TrainingIntervals interval = new TrainingIntervals(botUser.getId(), hour);
+        botUser.getTrainingIntervals().add(interval);
+        botUserRepository.save(botUser);
+    }
+
+    @Transactional
+    public void delUserTrainingIntervals(Chat chat, int hour){
+        BotUser botUser = botUserRepository.findByChatId(chat.id())
+                .orElseThrow(()->new ResourceNotFound("Пользователь с id '" + chat.id() + "' не найден"));
+        TrainingIntervals interval = null;
+        for (TrainingIntervals i:botUser.getTrainingIntervals()){
+            if(i.getStartHour()==hour){
+                interval=i;
+            }
+        }
+        if(interval!=null) {
+            botUser.getTrainingIntervals().remove(interval);
+            botUserRepository.save(botUser);
+        }
+    }
+
+    @Transactional
+    public void clearUserTrainingIntervals(Chat chat){
+        BotUser botUser = botUserRepository.findByChatId(chat.id())
+                .orElseThrow(()->new ResourceNotFound("Пользователь с id '" + chat.id() + "' не найден"));
+        botUser.getTrainingIntervals().clear();
+        botUserRepository.save(botUser);
+    }
+
 
     public Long saveBotUser(BotUser botUser) {
         botUserRepository.save(botUser);

@@ -53,7 +53,6 @@ public class BotService {
     Stack<Scenario<String, StageParams>> scenarioStack = new Stack<>();
 
     public Scenario<String, StageParams> startScenario(String scId, Chat chat) {
-        log.info("Get scenario for id - {}, in chat:{}", scId, chat.id());
         CommonScenario<String, StageParams> sc = (CommonScenario<String, StageParams>)simpleScManager.getScenarioById(scId)
                 .orElseThrow(()->new ScenarioMissing(String.format("chat:%1$S, Не найден сценарий по id - %2$S", chat.id(), scId)));
         sc.setBotService(this);
@@ -63,8 +62,8 @@ public class BotService {
         return sc;
     }
 
-    public Optional<BotUser> getUser(String userId, Chat chat){
-        return botUserService.getUser(userId, chat);
+    public Optional<BotUser> getUser(String userId){
+        return botUserService.getUser(userId);
     }
 
     public void loadChat() {
@@ -101,7 +100,7 @@ public class BotService {
         }
     }
 
-    private void checkScenStack(){
+    public void checkScenStack(){
         if (!scenarioStack.empty()){
             Scenario<String, StageParams> sc = scenarioStack.peek();
             if(sc.getCurrentStage()==null){
@@ -121,7 +120,7 @@ public class BotService {
                 checkScenStack();
                 return;
             }else{
-                Scenario<String, StageParams> sc = scenarioStack.peek();
+                Scenario<String, StageParams> sc = startScenario("MainMenuScenario", currentChat);
                 StageParams p = StageParams.builder().bot(bot).chat(chat).message(fullMes).request(request).build();
                 sc.doWork(p);
                 checkScenStack();

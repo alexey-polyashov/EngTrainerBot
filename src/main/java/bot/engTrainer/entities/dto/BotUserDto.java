@@ -15,7 +15,6 @@ public class BotUserDto {
     private Long chatId;
     private String name;
     private String email;
-    private String login;
     private Boolean marked;
     private Boolean blocked;
 

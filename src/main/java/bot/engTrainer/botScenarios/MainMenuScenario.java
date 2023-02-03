@@ -1,6 +1,7 @@
 package bot.engTrainer.botScenarios;
 
 import bot.engTrainer.exceptions.SWUException;
+import bot.engTrainer.scenariodefine.Scenario;
 import bot.engTrainer.scenariodefine.simplescenario.SimpleScenarioStage;
 import bot.engTrainer.services.BotService;
 import bot.engTrainer.services.ScenarioService;
@@ -24,13 +25,12 @@ public class MainMenuScenario extends CommonScenario<String, StageParams> {
 
     static final String msg_settings = "Settings";
     static final String msg_settings_cmd = "/settings";
+    static final String msg_help = "Help";
+    static final String msg_help_cmd = "/help";
     static final String msg_select_dictionary = "Select dictionary";
     static final String msg_select_dictionary_cmd = "/dictionary";
     static final String msg_start_training = "Start training";
     static final String msg_start_training_cmd = "/training";
-
-    static final String msg_settings_training_time = "Intervals";
-    static final String msg_settings_training_time_cmd = "/intervals";
 
     public MainMenuScenario() {
         super();
@@ -55,11 +55,12 @@ public class MainMenuScenario extends CommonScenario<String, StageParams> {
             Keyboard keyboard = new ReplyKeyboardMarkup(
                     new KeyboardButton(msg_start_training),
                     new KeyboardButton(msg_select_dictionary),
-                    new KeyboardButton(msg_settings))
+                    new KeyboardButton(msg_settings),
+                    new KeyboardButton(msg_help))
                     .oneTimeKeyboard(true)   // optional
                     .resizeKeyboard(true)    // optional
                     .selective(true);        // optional
-            bot.execute(new SendMessage(chat.id(),"").replyMarkup(keyboard));
+            bot.execute(new SendMessage(chat.id(),"Вы находитесь в главном меню").replyMarkup(keyboard));
 
             return "2";
         });
@@ -71,15 +72,21 @@ public class MainMenuScenario extends CommonScenario<String, StageParams> {
             String mes = p.getMessage().text();
 
             if(mes.equals(msg_settings) || mes.equals(msg_settings_cmd)){
-                bot.execute(new SendMessage(chat.id(), "Вы вошли в настройки."));
-                bot.execute(new SendMessage(chat.id(), "Выберите в меню пункт для настроек"));
-                return "3";
+                Scenario<String, StageParams> sc = botService.startScenario("SettingsScenario", chat);
+                sc.doWork(p);
+                botService.checkScenStack();
+                return "7";
             }else if(mes.equals(msg_select_dictionary) || mes.equals(msg_select_dictionary_cmd)){
                 bot.execute(new SendMessage(chat.id(), "Вы вошли в меню выбора словарей. Выберите аункт в меню для настройки словарей"));
                 return "4";
             }else if(mes.equals(msg_start_training) || mes.equals(msg_start_training_cmd)){
                 bot.execute(new SendMessage(chat.id(), "Тренировка начинается"));
                 return "5";
+            }else if(mes.equals(msg_help) || mes.equals(msg_help_cmd)){
+                bot.execute(new SendMessage(chat.id(), "Вы находитесь в главном меню"));
+                bot.execute(new SendMessage(chat.id(), "Вы можете выполнить настройки своего профиля, подключить словари для тренировки, или начать трнировку прямо сейчас."));
+                bot.execute(new SendMessage(chat.id(), "Выберите пункт меню, в каждом из них есть своя справка."));
+                return "2";
             }else{
                 bot.execute(new SendMessage(chat.id(), "Я вас не понимаю. Выберите пункт меню и действуюте по инструкциям."));
                 goToStage("1");
@@ -89,32 +96,22 @@ public class MainMenuScenario extends CommonScenario<String, StageParams> {
 
         });
 
-        SimpleScenarioStage<String, StageParams> st3 = new SimpleScenarioStage<>("3", (p) -> {
+        SimpleScenarioStage<String, StageParams> st7 = new SimpleScenarioStage<>("7", (p) -> {
             //if something wrong, return here
             Chat chat = p.getChat();
             TelegramBot bot = p.getBot();
             String mes = p.getMessage().text();
 
-            if(mes.equals(msg_settings) || mes.equals(msg_settings_cmd)){
-                bot.execute(new SendMessage(chat.id(), "Выберите в меню пункт для настроек"));
-                return "3";
-            }else if(mes.equals(msg_select_dictionary) || mes.equals(msg_select_dictionary_cmd)){
-                bot.execute(new SendMessage(chat.id(), "Вы вошли в меню выбора словарей. Выберите аункт в меню для настройки словарей"));
-                return "4";
-            }else if(mes.equals(msg_start_training) || mes.equals(msg_start_training_cmd)){
-                bot.execute(new SendMessage(chat.id(), "Тренировка начинается"));
-                return "5";
-            }else{
-                bot.execute(new SendMessage(chat.id(), "Я вас не понимаю. Выберите пункт меню и действуюте по инструкциям."));
-                goToStage("1");
-                doWork(p);
-                return "1";
-            }
+            bot.execute(new SendMessage(chat.id(), "Вы вернулись в главное меню."));
+            goToStage("1");
+            doWork(p);
+            return "1";
 
         });
 
         addStage(st1);
         addStage(st2);
+        addStage(st7);
 
     }
 
