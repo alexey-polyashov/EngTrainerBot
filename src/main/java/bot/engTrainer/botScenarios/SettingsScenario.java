@@ -11,9 +11,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Chat;
-import com.pengrad.telegrambot.model.request.Keyboard;
-import com.pengrad.telegrambot.model.request.KeyboardButton;
-import com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup;
+import com.pengrad.telegrambot.model.request.*;
 import com.pengrad.telegrambot.request.SendMessage;
 
 import java.util.HashMap;
@@ -162,7 +160,21 @@ public class SettingsScenario extends CommonScenario<String, StageParams> {
                 bot.execute(new SendMessage(chat.id(), "Введите час начала интервала (число от 1 до 24)").replyMarkup(keyboard));
                 return "32";
             }else if(mes.equals(msg_settings_training_time_del) || mes.equals(msg_settings_training_time_del_cmd)){
-                return "30";
+                Keyboard keyboard = new ReplyKeyboardMarkup(
+                        new KeyboardButton(msg_settings_back)
+                )
+                        .oneTimeKeyboard(true)   // optional
+                        .resizeKeyboard(true)    // optional
+                        .selective(true);        // optional
+                SendMessage sm = new SendMessage(chat.id(), "Выберите интервал для удаления").parseMode(ParseMode.HTML);
+                Set<TrainingIntervals> intervals = botUserService.getUserTrainingIntervals(chat);
+                int count = 1;
+                for (TrainingIntervals interval: intervals) {
+                    InlineKeyboardButton kbDelServ = new  InlineKeyboardButton("№" + count++ + " - " + interval.getStartHour() + " ч.").callbackData("del#" + interval.getStartHour());
+                    sm.replyMarkup(new InlineKeyboardMarkup(kbDelServ));
+                }
+                bot.execute(sm);
+                return "33";
             }else if(mes.equals(msg_settings_training_time_clr) || mes.equals(msg_settings_training_time_clr_cmd)){
                 return "30";
             }else if(mes.equals(msg_settings_back) || mes.equals(msg_settings_back_cmd)){
@@ -213,6 +225,17 @@ public class SettingsScenario extends CommonScenario<String, StageParams> {
                 bot.execute(new SendMessage(chat.id(), "Я вас не понимаю. Введите час начала нового интервала (число от 1 до 24), или вернитесь в меню настроек интервалов."));
                 return "32";
             }
+
+        });
+
+        SimpleScenarioStage<String, StageParams> st33 = new SimpleScenarioStage<>("33", (p) -> {
+
+            Chat chat = p.getChat();
+            TelegramBot bot = p.getBot();
+            String mes = p.getMessage().text();
+
+            bot.execute(new SendMessage(chat.id(), "Я вас не понимаю. Введите час начала нового интервала (число от 1 до 24), или вернитесь в меню настроек интервалов."));
+            return "32";
 
         });
 
