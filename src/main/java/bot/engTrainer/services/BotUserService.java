@@ -1,6 +1,7 @@
 package bot.engTrainer.services;
 
 import bot.engTrainer.entities.BotUser;
+import bot.engTrainer.entities.Dictionaries;
 import bot.engTrainer.entities.Roles;
 import bot.engTrainer.entities.TrainingIntervals;
 import bot.engTrainer.entities.dto.BotUserDto;
@@ -10,6 +11,7 @@ import bot.engTrainer.entities.dto.RoleDto;
 import bot.engTrainer.entities.mappers.BotUserMapper;
 import bot.engTrainer.exceptions.ResourceNotFound;
 import bot.engTrainer.repository.BotUserRepository;
+import bot.engTrainer.repository.DictionaryRepository;
 import bot.engTrainer.repository.RoleRepository;
 import com.pengrad.telegrambot.model.Chat;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +32,7 @@ public class BotUserService {
     private final BotUserMapper botUserMapper;
     private final RoleRepository roleRepository;
     private final BotUserRepository botUserRepository;
+    private final DictionaryRepository dictionaryRepository;
 
 
     public BotUser getUserByString(String identifier){
@@ -150,6 +153,26 @@ public class BotUserService {
 
     public void deleteBotUser(Long userId){
         botUserRepository.deleteById(userId);
+    }
+
+    @Transactional
+    public Set<Dictionaries> getSelectedDictionaries(Chat chat){
+        BotUser user = botUserRepository.findByChatId(chat.id()).orElseThrow(()-> new ResourceNotFound("Пользователь по id чата '" + chat.id() + "' не найден"));
+        return user.getSelectDictionaries();
+    }
+
+    @Transactional
+    public void addDictionary(Chat chat, Dictionaries dict){
+        BotUser user = botUserRepository.findByChatId(chat.id()).orElseThrow(()-> new ResourceNotFound("Пользователь по id чата '" + chat.id() + "' не найден"));
+        user.getSelectDictionaries().add(dict);
+        botUserRepository.save(user);
+    }
+
+    @Transactional
+    public void delDictionary(Chat chat, Dictionaries dict){
+        BotUser user = botUserRepository.findByChatId(chat.id()).orElseThrow(()-> new ResourceNotFound("Пользователь по id чата '" + chat.id() + "' не найден"));
+        user.getSelectDictionaries().remove(dict);
+        botUserRepository.save(user);
     }
 
 }
