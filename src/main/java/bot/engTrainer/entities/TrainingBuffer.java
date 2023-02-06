@@ -12,14 +12,14 @@ import java.sql.Date;
 @Getter
 @Setter
 @NoArgsConstructor
-public class TrainingProgress {
+public class TrainingBuffer {
 
     @Id
     @Column(name = "id")
     private Long id;
 
-    @Column(name="user_id")
-    private Long userId;
+    @Column(name="bot_user")
+    private BotUser botUser;
 
     @ManyToOne(fetch = FetchType.EAGER)
     private Words word;

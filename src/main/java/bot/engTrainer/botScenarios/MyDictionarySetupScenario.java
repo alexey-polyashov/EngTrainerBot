@@ -14,14 +14,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class SelectDictionaryScenario extends CommonScenario<String, StageParams> {
+public class MyDictionarySetupScenario extends CommonScenario<String, StageParams> {
 
     private ScenarioService scenarioService;
     private BotService botService;
 
-    public SelectDictionaryScenario() {
+    public MyDictionarySetupScenario() {
         super();
-        setScenarioId("SelectDictionaryScenario");
+        setScenarioId("MyDictionarySetupScenario");
     }
 
     public void setScenarioService(ScenarioService scenarioService){
@@ -38,16 +38,14 @@ public class SelectDictionaryScenario extends CommonScenario<String, StageParams
         SimpleScenarioStage<String, StageParams> st1 = new SimpleScenarioStage<>("1", (p) -> {
             Chat chat = p.getChat();
             TelegramBot bot = p.getBot();
-            bot.execute(new SendMessage(chat.id(), "Пора начать тренировку."));
-            bot.execute(new SendMessage(chat.id(), "Ты готов?"));
+            bot.execute(new SendMessage(chat.id(), "Вы вошли в меню настройки словаря"));
             return "2";
         });
 
         SimpleScenarioStage<String, StageParams> st2 = new SimpleScenarioStage<>("2", (p) -> {
-            //if something wrong, return here
             Chat chat = p.getChat();
             TelegramBot bot = p.getBot();
-            bot.execute(new SendMessage(chat.id(), "Тренировка закончена."));
+            bot.execute(new SendMessage(chat.id(), "Словарь настроен."));
             return null;
         });
 

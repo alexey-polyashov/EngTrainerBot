@@ -1,5 +1,6 @@
 package bot.engTrainer.botScenarios;
 
+import bot.engTrainer.entities.BotUser;
 import bot.engTrainer.entities.Dictionaries;
 import bot.engTrainer.entities.TrainingIntervals;
 import bot.engTrainer.exceptions.SWUException;
@@ -30,6 +31,8 @@ public class SettingsScenario extends CommonScenario<String, StageParams> {
     static final String msg_settings_training_time_cmd = "/intervals";
     static final String msg_settings_intensive = "Intensity";
     static final String msg_settings_intensive_cmd = "/intensity";
+    static final String msg_settings_dictionaries = "Dictionaries";
+    static final String msg_settings_dictionaries_cmd = "/dictionaries";
     static final String msg_help = "Help";
     static final String msg_help_cmd = "/help";
     static final String msg_settings_mainmenu = "Main menu";
@@ -99,12 +102,15 @@ public class SettingsScenario extends CommonScenario<String, StageParams> {
                 sc.doWork(p);
                 botService.checkScenStack();
                 return "30";
-            }else if(mes.equals(msg_settings_intensive) || mes.equals(msg_settings_intensive_cmd)){
-                bot.execute(new SendMessage(chat.id(), "Вы вошли в меню выбора словарей. Выберите аункт в меню для настройки словарей"));
+            }else if(mes.equals(msg_settings_dictionaries) || mes.equals(msg_settings_dictionaries_cmd)){
+                bot.execute(new SendMessage(chat.id(), "Вы вошли в меню выбора словарей. Выберите пункт в меню для настройки словарей"));
                 return "40";
-            }else if(mes.equals(msg_settings_mainmenu) || mes.equals(msg_settings_mainmenu_cmd)){
-                bot.execute(new SendMessage(chat.id(), "Тренировка начинается"));
+            }else if(mes.equals(msg_settings_intensive) || mes.equals(msg_settings_intensive_cmd)){
+                bot.execute(new SendMessage(chat.id(), "Вы вошли в меню настройки интенсивности тренировок"));
                 return "50";
+            }else if(mes.equals(msg_settings_mainmenu) || mes.equals(msg_settings_mainmenu_cmd)){
+                bot.execute(new SendMessage(chat.id(), "Вы вернулись в главное меню"));
+                return null;
             }else if(mes.equals(msg_help) || mes.equals(msg_help_cmd)){
                 bot.execute(new SendMessage(chat.id(), "Вы находитесь в разделе настроек"));
                 bot.execute(new SendMessage(chat.id(), "Здесь вы можете настроить временные интервалы тренировок. Бот запустит тренировку автоматически в выбранные интервалы времени. "));
@@ -256,7 +262,7 @@ public class SettingsScenario extends CommonScenario<String, StageParams> {
             switch (mesParts[0]) {
                 case "del":
                     String sHour = mesParts[1];
-                    int iHour = Integer.valueOf(sHour);
+                    int iHour = Integer.parseInt(sHour);
                     if(iHour>0 && iHour<=24){
                         botUserService.delUserTrainingIntervals(chat, iHour);
                         bot.execute(new SendMessage(chat.id(), "Интервал тренировки на " + iHour + " удален"));
@@ -299,63 +305,74 @@ public class SettingsScenario extends CommonScenario<String, StageParams> {
             TelegramBot bot = p.getBot();
             String mes = p.getMessage().text();
 
-            if(mes.equals(msg_settings_dictionaries_show) || mes.equals(msg_settings_dictionaries_show_cmd)){
-                Set<Dictionaries> dicts = botUserService.getSelectedDictionaries(chat);
-                int count = 1;
-                for (Dictionaries dict: dicts) {
+            switch (mes) {
+                case msg_settings_dictionaries_show:
+                case msg_settings_dictionaries_show_cmd: {
+                    Set<Dictionaries> dicts = botUserService.getSelectedDictionaries(chat);
+                    int count = 1;
+                    for (Dictionaries dict : dicts) {
+                        Keyboard keyboard = new ReplyKeyboardMarkup(
+                                new KeyboardButton(msg_settings_back)
+                        );
+                        bot.execute(new SendMessage(chat.id(), "<b>№" + (count++) + " - " + dict.getName() + "</b>\n" +
+                                "<u>" + dict.getDescription() + "</u>").parseMode(ParseMode.HTML));
+                    }
+                    return "40";
+                }
+                case msg_settings_dictionaries_add:
+                case msg_settings_dictionaries_add_cmd: {
+                    List<Dictionaries> dicts = dictionaryService.getDictionaries();
+                    int count = 1;
+                    bot.execute(new SendMessage(chat.id(), "Нажмите 'Добавить' под выбранным словарем"));
+                    for (Dictionaries dict : dicts) {
+                        InlineKeyboardButton keyLine = new InlineKeyboardButton("Добавить - " + dict.getName()).callbackData("plug#" + dict.getId());
+                        bot.execute(new SendMessage(chat.id(), "<b>№" + (count++) + " - " + dict.getName() + "</b>\n" +
+                                "<u>" + dict.getDescription() + "</u>").parseMode(ParseMode.HTML).replyMarkup(new InlineKeyboardMarkup(keyLine)));
+                    }
                     Keyboard keyboard = new ReplyKeyboardMarkup(
                             new KeyboardButton(msg_settings_back)
-                    );
-                    bot.execute(new SendMessage(chat.id(), "<b>№" + (count++) + " - " + dict.getName() + "</b>\n" +
-                            "<u>" + dict.getDescription() + "</u>").parseMode(ParseMode.HTML));
+                    )
+                            .oneTimeKeyboard(true)   // optional
+                            .resizeKeyboard(true)    // optional
+                            .selective(true);        // optional
+
+                    return "42";
                 }
-                return "40";
-            }else if(mes.equals(msg_settings_dictionaries_add) || mes.equals(msg_settings_dictionaries_add_cmd)){
-                List<Dictionaries> dicts = dictionaryService.getDictionaries();
-                int count = 1;
-                bot.execute(new SendMessage(chat.id(), "Нажмите 'Добавить' под выбранным словарем"));
-                for (Dictionaries dict: dicts) {
-                    InlineKeyboardButton keyLine = new  InlineKeyboardButton("Добавить - " + dict.getName()).callbackData("plug#" + dict.getId());
-                    bot.execute(new SendMessage(chat.id(), "<b>№" + (count++) + " - " + dict.getName() + "</b>\n" +
-                            "<u>" + dict.getDescription() + "</u>").parseMode(ParseMode.HTML).replyMarkup(new InlineKeyboardMarkup(keyLine)));
+                case msg_settings_training_time_del:
+                case msg_settings_training_time_del_cmd: {
+                    Set<Dictionaries> dicts = botUserService.getSelectedDictionaries(chat);
+                    int count = 1;
+                    bot.execute(new SendMessage(chat.id(), "Нажмите 'Отключить' под выбранным словарем"));
+                    for (Dictionaries dict : dicts) {
+                        InlineKeyboardButton keyLine = new InlineKeyboardButton("Отключить - " + dict.getName()).callbackData("unplug#" + dict.getId());
+                        bot.execute(new SendMessage(chat.id(), "<b>№" + (count++) + " - " + dict.getName() + "</b>\n" +
+                                "<u>" + dict.getDescription() + "</u>").parseMode(ParseMode.HTML).replyMarkup(new InlineKeyboardMarkup(keyLine)));
+                    }
+                    Keyboard keyboard = new ReplyKeyboardMarkup(
+                            new KeyboardButton(msg_settings_back)
+                    )
+                            .oneTimeKeyboard(true)   // optional
+                            .resizeKeyboard(true)    // optional
+                            .selective(true);        // optional
+
+                    return "43";
                 }
-                Keyboard keyboard = new ReplyKeyboardMarkup(
-                    new KeyboardButton(msg_settings_back)
-                )
-                .oneTimeKeyboard(true)   // optional
-                .resizeKeyboard(true)    // optional
-                .selective(true);        // optional
-                return "42";
-            }else if(mes.equals(msg_settings_training_time_del) || mes.equals(msg_settings_training_time_del_cmd)){
-                Set<Dictionaries> dicts = botUserService.getSelectedDictionaries(chat);
-                int count = 1;
-                bot.execute(new SendMessage(chat.id(), "Нажмите 'Отключить' под выбранным словарем"));
-                for (Dictionaries dict: dicts) {
-                    InlineKeyboardButton keyLine = new  InlineKeyboardButton("Отключить - " + dict.getName()).callbackData("unplug#" + dict.getId());
-                    bot.execute(new SendMessage(chat.id(), "<b>№" + (count++) + " - " + dict.getName() + "</b>\n" +
-                            "<u>" + dict.getDescription() + "</u>").parseMode(ParseMode.HTML).replyMarkup(new InlineKeyboardMarkup(keyLine)));
-                }
-                Keyboard keyboard = new ReplyKeyboardMarkup(
-                        new KeyboardButton(msg_settings_back)
-                )
-                        .oneTimeKeyboard(true)   // optional
-                        .resizeKeyboard(true)    // optional
-                        .selective(true);        // optional
-                return "43";
-            }else if(mes.equals(msg_settings_back) || mes.equals(msg_settings_back_cmd)){
-                goToStage("1");
-                doWork(p);
-                return "1";
-            }else if(mes.equals(msg_help) || mes.equals(msg_help_cmd)){
-                bot.execute(new SendMessage(chat.id(), "Вы находитесь в разделе выбора словарей"));
-                bot.execute(new SendMessage(chat.id(), "Здесь вы можете посмотреть выбранные словари для изучения, подключить или отключить словаь."));
-                bot.execute(new SendMessage(chat.id(), "Из выбранных словарей, бот будет предлагать слова во время тренировок. Если нет выбранных словарей, бот будет испоьзовать все словари."));
-                return "40";
-            }else{
-                bot.execute(new SendMessage(chat.id(), "Я вас не понимаю. Выберите пункт меню."));
-                goToStage("40");
-                doWork(p);
-                return "40";
+                case msg_settings_back:
+                case msg_settings_back_cmd:
+                    goToStage("1");
+                    doWork(p);
+                    return "1";
+                case msg_help:
+                case msg_help_cmd:
+                    bot.execute(new SendMessage(chat.id(), "Вы находитесь в разделе выбора словарей"));
+                    bot.execute(new SendMessage(chat.id(), "Здесь вы можете посмотреть выбранные словари для изучения, подключить или отключить словаь."));
+                    bot.execute(new SendMessage(chat.id(), "Из выбранных словарей, бот будет предлагать слова во время тренировок. Если нет выбранных словарей, бот будет испоьзовать все словари."));
+                    return "40";
+                default:
+                    bot.execute(new SendMessage(chat.id(), "Я вас не понимаю. Выберите пункт меню."));
+                    goToStage("40");
+                    doWork(p);
+                    return "40";
             }
 
         });
@@ -371,14 +388,14 @@ public class SettingsScenario extends CommonScenario<String, StageParams> {
                 goToStage("40");
                 doWork(p);
                 return "40";
-            }else if(mesParts[0].equals("unplug")){
-                long id = Long.valueOf(mesParts[1]);
+            }else if(mesParts[0].equals("plug")){
+                long id = Long.parseLong(mesParts[1]);
                 Dictionaries dict = dictionaryService.getById(id);
                 botUserService.addDictionary(chat, dict);
                 bot.execute(new SendMessage(chat.id(), "Словарь <b>'" + dict.getName() + "'</b> подключен"));
                 return "40";
             }else{
-                bot.execute(new SendMessage(chat.id(), "Я вас не понимаю. Выберите словарб для подключения и нажмите кнопку под ним."));
+                bot.execute(new SendMessage(chat.id(), "Я вас не понимаю. Выберите словарь для подключения и нажмите кнопку под ним."));
                 return "42";
             }
 
@@ -395,15 +412,78 @@ public class SettingsScenario extends CommonScenario<String, StageParams> {
                 goToStage("40");
                 doWork(p);
                 return "40";
-            }else if(mesParts[0].equals("plug")){
-                long id = Long.valueOf(mesParts[1]);
+            }else if(mesParts[0].equals("unplug")){
+                long id = Long.parseLong(mesParts[1]);
                 Dictionaries dict = dictionaryService.getById(id);
-                botUserService.addDictionary(chat, dict);
+                botUserService.delDictionary(chat, dict);
                 bot.execute(new SendMessage(chat.id(), "Словарь <b>'" + dict.getName() + "'</b> отключен"));
                 return "40";
             }else{
-                bot.execute(new SendMessage(chat.id(), "Я вас не понимаю. Выберите словарб для отключения и нажмите кнопку под ним."));
+                bot.execute(new SendMessage(chat.id(), "Я вас не понимаю. Выберите словарь для отключения и нажмите кнопку под ним."));
                 return "43";
+            }
+
+        });
+
+
+
+
+        SimpleScenarioStage<String, StageParams> st50 = new SimpleScenarioStage<>("50", (p) -> {
+
+            Chat chat = p.getChat();
+            TelegramBot bot = p.getBot();
+            String mes = p.getMessage().text();
+            Optional<BotUser> botUser = botUserService.getUserByChat(chat);
+            Keyboard keyboard = new ReplyKeyboardMarkup(
+                    new KeyboardButton(msg_settings_back)
+            )
+                    .oneTimeKeyboard(true)   // optional
+                    .resizeKeyboard(true)    // optional
+                    .selective(true);        // optional
+            if(botUser.isPresent()){
+                bot.execute(new SendMessage(chat.id(),"Ваша текущая интенсивность тренировок - " + botUser.get().getTrainigIntensity() + " слов в день").replyMarkup(keyboard));
+                bot.execute(new SendMessage(chat.id(),"Для изменения введите целое число в диапазоне от 1 до 50, равное количеству слов в день, которое вы хотите изучать. Для отмены изменений вернитесь назад.").replyMarkup(keyboard));
+            }else{
+                bot.execute(new SendMessage(chat.id(),"Ошибка! Вашего аккаунта нет в базе").replyMarkup(keyboard));
+            }
+
+            return "51";
+
+        });
+
+        SimpleScenarioStage<String, StageParams> st51 = new SimpleScenarioStage<>("51", (p) -> {
+
+            Chat chat = p.getChat();
+            TelegramBot bot = p.getBot();
+            String mes = p.getMessage().text();
+
+            if(mes.equals(msg_settings_back) || mes.equals(msg_settings_back_cmd)){
+                goToStage("1");
+                doWork(p);
+                return "1";
+            }else if(!mes.isEmpty()){
+                mes=mes.trim();
+                int intensity = 0;
+                if(mes.length()<=2){
+                    try {
+                        intensity = Integer.parseInt(mes);
+                    }catch (Exception e){
+                        bot.execute(new SendMessage(chat.id(), "Введите целое число от 1 до 50"));
+                        return "51";
+                    }
+                }
+                Optional<BotUser> botUser = botUserService.getUserByChat(chat);
+                if(botUser.isPresent()){
+                    BotUser entity = botUser.get();
+                    entity.setTrainigIntensity(intensity);
+                    botUserService.saveBotUser(entity);
+                }
+                goToStage("1");
+                doWork(p);
+                return "1";
+            }else{
+                bot.execute(new SendMessage(chat.id(), "Я вас не понимаю. Для изменения введите целое число в диапазоне от 1 до 50, равное количеству слов в день, которое вы хотите изучать. Для отмены изменений вернитесь назад."));
+                return "51";
             }
 
         });
@@ -414,6 +494,12 @@ public class SettingsScenario extends CommonScenario<String, StageParams> {
         addStage(st31);
         addStage(st32);
         addStage(st33);
+        addStage(st40);
+        addStage(st41);
+        addStage(st42);
+        addStage(st43);
+        addStage(st50);
+        addStage(st51);
 
     }
 
