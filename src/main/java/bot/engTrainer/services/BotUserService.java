@@ -35,6 +35,23 @@ public class BotUserService {
     private final DictionaryRepository dictionaryRepository;
 
 
+    public BotUserDto registerNewUser(Chat chat, String name, String email){
+        Optional<BotUser> botUser = getUserByChat(chat);
+        if(botUser.isPresent()){
+            return botUserMapper.toDto(botUser.get());
+        }
+        BotUser newUser = new BotUser();
+        newUser.getRoles().add(
+                roleRepository.findByName("USER").orElseThrow(()->new ResourceNotFound("Роль USER не найдена")));
+        newUser.setName(name);
+        newUser.setChatId(chat.id());
+        newUser.setEmail("");
+        newUser.setEmail(email);
+        newUser.setMarked(false);
+        botUserRepository.save(newUser);
+        return  botUserMapper.toDto(newUser);
+    }
+
     public BotUser getUserByString(String identifier){
         return getUser(identifier)
                 .orElseThrow(()->new ResourceNotFound("Пользователь с логином или email '" + identifier + "' не найден в базе"));

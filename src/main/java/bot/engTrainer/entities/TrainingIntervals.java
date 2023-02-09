@@ -8,7 +8,7 @@ import org.hibernate.annotations.ColumnDefault;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "words")
+@Table(name = "training_intervals")
 @Getter
 @Setter
 @NoArgsConstructor
