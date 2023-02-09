@@ -37,9 +37,9 @@ public class BotUser {
     @ColumnDefault("false")
     private Boolean blocked = false;
 
-    @Column(name = "intensity")
+    @Column(name = "training_intensity")
     @ColumnDefault("0")
-    private int intensity;
+    private int trainigIntensity;
 
     @ManyToMany
     @JoinTable(name="select_dict",
