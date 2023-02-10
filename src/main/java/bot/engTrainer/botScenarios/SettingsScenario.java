@@ -3,15 +3,12 @@ package bot.engTrainer.botScenarios;
 import bot.engTrainer.entities.BotUser;
 import bot.engTrainer.entities.Dictionaries;
 import bot.engTrainer.entities.TrainingIntervals;
-import bot.engTrainer.exceptions.SWUException;
 import bot.engTrainer.scenariodefine.Scenario;
 import bot.engTrainer.scenariodefine.simplescenario.SimpleScenarioStage;
 import bot.engTrainer.services.BotService;
 import bot.engTrainer.services.BotUserService;
 import bot.engTrainer.services.DictionaryService;
 import bot.engTrainer.services.ScenarioService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.request.*;
@@ -20,10 +17,8 @@ import com.pengrad.telegrambot.request.SendMessage;
 import java.util.*;
 
 
-public class SettingsScenario extends CommonScenario<String, StageParams> {
+public class SettingsScenario extends CommonScenario {
 
-    private ScenarioService scenarioService;
-    private BotService botService;
     private BotUserService botUserService;
     private DictionaryService dictionaryService;
 
@@ -59,14 +54,6 @@ public class SettingsScenario extends CommonScenario<String, StageParams> {
     public SettingsScenario() {
         super();
         setScenarioId("SettingsScenario");
-    }
-
-    public void setScenarioService(ScenarioService scenarioService){
-        this.scenarioService = scenarioService;
-    }
-
-    public void setBotService(BotService botService){
-        this.botService = botService;
     }
 
     @Override
@@ -503,43 +490,5 @@ public class SettingsScenario extends CommonScenario<String, StageParams> {
 
     }
 
-    @Override
-    public void finish() {
-        botService.endCurrentScenario();
-    }
-
-    @Override
-    public String toString() {
-        return "{" +
-                "\"currentStage\":\"" + getCurrentStage().getIdentifier() + "\"," +
-                "\"started\":\"" + isStarted() + "\"," +
-                "\"done\":\"" + isDone() + "\"" +
-                "}";
-    }
-
-    @Override
-    public long save() {
-        String jsonData = toString();
-        return scenarioService.saveScenario(botService.getCurrentChat().id(),this,  jsonData);
-    }
-
-    @Override
-    public void load(long id) {
-        String jsonData = "";
-        Map<String, String> mapped = new HashMap<>();
-        jsonData = scenarioService.restoreScenario(botService.getCurrentChat().id(), this);
-        if(!jsonData.isEmpty()){
-            ObjectMapper objectMapper = new ObjectMapper();
-            try {
-                mapped = objectMapper.readValue(jsonData, Map.class);
-            } catch (JsonProcessingException e) {
-                throw new SWUException("Ошибка инициализации сценария" + getId());
-            }
-            String stageKey = mapped.get("currentStage");
-            setCurrentStage(getStage(stageKey).orElseThrow(()->new SWUException("Не определен этап сценария " + stageKey)));
-            setDone(Boolean.valueOf(mapped.get("done")));
-            setStarted(Boolean.valueOf(mapped.get("started")));
-        }
-    }
 
 }

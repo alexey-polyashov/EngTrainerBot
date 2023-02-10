@@ -1,12 +1,7 @@
 package bot.engTrainer.botScenarios;
 
-import bot.engTrainer.exceptions.SWUException;
 import bot.engTrainer.scenariodefine.Scenario;
 import bot.engTrainer.scenariodefine.simplescenario.SimpleScenarioStage;
-import bot.engTrainer.services.BotService;
-import bot.engTrainer.services.ScenarioService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.request.Keyboard;
@@ -14,14 +9,8 @@ import com.pengrad.telegrambot.model.request.KeyboardButton;
 import com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup;
 import com.pengrad.telegrambot.request.SendMessage;
 
-import java.util.HashMap;
-import java.util.Map;
 
-
-public class MainMenuScenario extends CommonScenario<String, StageParams> {
-
-    private ScenarioService scenarioService;
-    private BotService botService;
+public class MainMenuScenario extends CommonScenario {
 
     static final String msg_settings = "Settings";
     static final String msg_settings_cmd = "/settings";
@@ -37,12 +26,16 @@ public class MainMenuScenario extends CommonScenario<String, StageParams> {
         setScenarioId("MainMenuScenario");
     }
 
-    public void setScenarioService(ScenarioService scenarioService){
-        this.scenarioService = scenarioService;
-    }
-
-    public void setBotService(BotService botService){
-        this.botService = botService;
+    private void showMainMenu(TelegramBot bot, Chat chat){
+        Keyboard keyboard = new ReplyKeyboardMarkup(
+                new KeyboardButton(msg_start_training),
+                new KeyboardButton(msg_select_dictionary),
+                new KeyboardButton(msg_settings),
+                new KeyboardButton(msg_help))
+                .oneTimeKeyboard(true)   // optional
+                .resizeKeyboard(true)    // optional
+                .selective(true);        // optional
+        bot.execute(new SendMessage(chat.id(),"Вы находитесь в главном меню").replyMarkup(keyboard));
     }
 
     @Override
@@ -51,17 +44,7 @@ public class MainMenuScenario extends CommonScenario<String, StageParams> {
         SimpleScenarioStage<String, StageParams> st1 = new SimpleScenarioStage<>("1", (p) -> {
             Chat chat = p.getChat();
             TelegramBot bot = p.getBot();
-
-            Keyboard keyboard = new ReplyKeyboardMarkup(
-                    new KeyboardButton(msg_start_training),
-                    new KeyboardButton(msg_select_dictionary),
-                    new KeyboardButton(msg_settings),
-                    new KeyboardButton(msg_help))
-                    .oneTimeKeyboard(true)   // optional
-                    .resizeKeyboard(true)    // optional
-                    .selective(true);        // optional
-            bot.execute(new SendMessage(chat.id(),"Вы находитесь в главном меню").replyMarkup(keyboard));
-
+            showMainMenu(bot, chat);
             return "2";
         });
 
@@ -74,7 +57,6 @@ public class MainMenuScenario extends CommonScenario<String, StageParams> {
             if(mes.equals(msg_settings) || mes.equals(msg_settings_cmd)){
                 Scenario<String, StageParams> sc = botService.startScenario("SettingsScenario", chat);
                 sc.doWork(p);
-                botService.checkScenStack();
                 return "7";
             }else if(mes.equals(msg_select_dictionary) || mes.equals(msg_select_dictionary_cmd)){
                 bot.execute(new SendMessage(chat.id(), "Вы вошли в меню выбора словарей. Выберите аункт в меню для настройки словарей"));
@@ -116,42 +98,10 @@ public class MainMenuScenario extends CommonScenario<String, StageParams> {
     }
 
     @Override
-    public void finish() {
-        botService.endCurrentScenario();
+    public void resume(Object param) {
+        TelegramBot bot = new TelegramBot(botService.getBotConfig().getToken());
+        showMainMenu(bot, botService.getCurrentChat());
     }
 
-    @Override
-    public String toString() {
-        return "{" +
-                "\"currentStage\":\"" + getCurrentStage().getIdentifier() + "\"," +
-                "\"started\":\"" + isStarted() + "\"," +
-                "\"done\":\"" + isDone() + "\"" +
-                "}";
-    }
-
-    @Override
-    public long save() {
-        String jsonData = toString();
-        return scenarioService.saveScenario(botService.getCurrentChat().id(),this,  jsonData);
-    }
-
-    @Override
-    public void load(long id) {
-        String jsonData = "";
-        Map<String, String> mapped = new HashMap<>();
-        jsonData = scenarioService.restoreScenario(botService.getCurrentChat().id(), this);
-        if(!jsonData.isEmpty()){
-            ObjectMapper objectMapper = new ObjectMapper();
-            try {
-                mapped = objectMapper.readValue(jsonData, Map.class);
-            } catch (JsonProcessingException e) {
-                throw new SWUException("Ошибка инициализации сценария" + getId());
-            }
-            String stageKey = mapped.get("currentStage");
-            setCurrentStage(getStage(stageKey).orElseThrow(()->new SWUException("Не определен этап сценария " + stageKey)));
-            setDone(Boolean.valueOf(mapped.get("done")));
-            setStarted(Boolean.valueOf(mapped.get("started")));
-        }
-    }
 
 }

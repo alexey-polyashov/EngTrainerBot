@@ -68,6 +68,10 @@ public abstract class SimpleScenario<T, P> implements Scenario<T, P> {
         );
     }
 
+    public void resume(Object param){
+
+    }
+
     @Override
     public void start() {
         this.started = true;

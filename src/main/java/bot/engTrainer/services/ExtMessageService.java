@@ -8,7 +8,7 @@ import bot.engTrainer.entities.dto.ExtMessageDto;
 import bot.engTrainer.entities.dto.NewExtMessageDto;
 import bot.engTrainer.entities.mappers.ExtMessageMapper;
 import bot.engTrainer.exceptions.ResourceNotFound;
-import bot.engTrainer.exceptions.SWUException;
+import bot.engTrainer.exceptions.BotException;
 import bot.engTrainer.repository.ExtMessageRepository;
 import bot.engTrainer.repository.MessageAttachmentRepository;
 import com.pengrad.telegrambot.TelegramBot;
@@ -35,7 +35,6 @@ public class ExtMessageService {
     private final ExtMessageRepository messageRepository;
     private final MessageAttachmentRepository attachmentRepository;
     private final ExtMessageMapper messageMapper;
-    private final BotUserService botUserService;
     private final BotConfig botConfig;
 
     private static final String CRON = "*/10 * * * * *";
@@ -108,7 +107,7 @@ public class ExtMessageService {
             recipients.add(message.getBotUser());
         }
         if(recipients.size()==0){
-            throw new SWUException("No recipient for message: uuid - '" + message.getId() + "'");
+            throw new BotException("No recipient for message: uuid - '" + message.getId() + "'");
         }
         for (BotUser botUser : recipients) {
             Long chatId = botUser.getChatId();

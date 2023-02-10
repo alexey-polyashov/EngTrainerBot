@@ -1,6 +1,6 @@
 package bot.engTrainer.botScenarios;
 
-import bot.engTrainer.exceptions.SWUException;
+import bot.engTrainer.exceptions.BotException;
 import bot.engTrainer.scenariodefine.simplescenario.SimpleScenarioStage;
 import bot.engTrainer.services.BotService;
 import bot.engTrainer.services.ScenarioService;
@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class MyDictionarySetupScenario extends CommonScenario<String, StageParams> {
+public class MyDictionarySetupScenario extends CommonScenario {
 
     private ScenarioService scenarioService;
     private BotService botService;
@@ -38,7 +38,7 @@ public class MyDictionarySetupScenario extends CommonScenario<String, StageParam
         SimpleScenarioStage<String, StageParams> st1 = new SimpleScenarioStage<>("1", (p) -> {
             Chat chat = p.getChat();
             TelegramBot bot = p.getBot();
-            bot.execute(new SendMessage(chat.id(), "Вы вошли в меню настройки словаря"));
+            bot.execute(new SendMessage(chat.id(), "Вы находитесь в меню настройки словаря"));
             return "2";
         });
 
@@ -54,43 +54,5 @@ public class MyDictionarySetupScenario extends CommonScenario<String, StageParam
 
     }
 
-    @Override
-    public void finish() {
-        botService.endCurrentScenario();
-    }
-
-    @Override
-    public String toString() {
-        return "{" +
-                "\"currentStage\":\"" + getCurrentStage().getIdentifier() + "\"," +
-                "\"started\":\"" + isStarted() + "\"," +
-                "\"done\":\"" + isDone() + "\"" +
-                "}";
-    }
-
-    @Override
-    public long save() {
-        String jsonData = toString();
-        return scenarioService.saveScenario(botService.getCurrentChat().id(),this,  jsonData);
-    }
-
-    @Override
-    public void load(long id) {
-        String jsonData = "";
-        Map<String, String> mapped = new HashMap<>();
-        jsonData = scenarioService.restoreScenario(botService.getCurrentChat().id(), this);
-        if(!jsonData.isEmpty()){
-            ObjectMapper objectMapper = new ObjectMapper();
-            try {
-                mapped = objectMapper.readValue(jsonData, Map.class);
-            } catch (JsonProcessingException e) {
-                throw new SWUException("Ошибка инициализации сценария" + getId());
-            }
-            String stageKey = mapped.get("currentStage");
-            setCurrentStage(getStage(stageKey).orElseThrow(()->new SWUException("Не определен этап сценария " + stageKey)));
-            setDone(Boolean.valueOf(mapped.get("done")));
-            setStarted(Boolean.valueOf(mapped.get("started")));
-        }
-    }
 
 }

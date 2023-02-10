@@ -38,6 +38,11 @@ public interface Scenario<T, P> {
     void goToEnd();
 
     /**
+     * Продолжение поле остановки
+     */
+    void resume(Object params);
+
+    /**
      * Переход к точке старта сценария.
      */
     void goToStart();

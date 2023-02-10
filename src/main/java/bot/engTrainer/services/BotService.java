@@ -1,12 +1,12 @@
 package bot.engTrainer.services;
 
 import bot.engTrainer.botScenarios.CommonScenario;
-import bot.engTrainer.botScenarios.MainMenuScenario;
 import bot.engTrainer.botScenarios.SimpleScManagerConfig;
 import bot.engTrainer.botScenarios.StageParams;
+import bot.engTrainer.config.BotConfig;
 import bot.engTrainer.entities.BotUser;
 import bot.engTrainer.entities.UserStack;
-import bot.engTrainer.exceptions.SWUException;
+import bot.engTrainer.exceptions.BotException;
 import bot.engTrainer.exceptions.ScenarioMissing;
 import bot.engTrainer.repository.UserStackRepository;
 import bot.engTrainer.scenariodefine.Scenario;
@@ -14,10 +14,6 @@ import com.github.kshashov.telegram.api.TelegramRequest;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.Message;
-import com.pengrad.telegrambot.model.request.Keyboard;
-import com.pengrad.telegrambot.model.request.KeyboardButton;
-import com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup;
-import com.pengrad.telegrambot.request.SendMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Scope;
@@ -39,6 +35,7 @@ public class BotService {
     private final BotUserService botUserService;
     private final ScenarioService scenarioService;
     private final UserStackRepository userStackRepository;
+    private final BotConfig botConfig;
 
     private Chat currentChat;
 
@@ -46,17 +43,22 @@ public class BotService {
         return currentChat;
     }
 
+    public BotConfig getBotConfig() {
+        return botConfig;
+    }
+
     public void setCurrentChat(Chat currentChat) {
         this.currentChat = currentChat;
     }
 
-    Stack<Scenario<String, StageParams>> scenarioStack = new Stack<>();
+    Stack<CommonScenario> scenarioStack = new Stack<>();
 
-    public Scenario<String, StageParams> startScenario(String scId, Chat chat) {
-        CommonScenario<String, StageParams> sc = (CommonScenario<String, StageParams>)simpleScManager.getScenarioById(scId)
+    public CommonScenario startScenario(String scId, Chat chat) {
+        CommonScenario sc = (CommonScenario)simpleScManager.getScenarioById(scId)
                 .orElseThrow(()->new ScenarioMissing(String.format("chat:%1$S, Не найден сценарий по id - %2$S", chat.id(), scId)));
         sc.setBotService(this);
         sc.setScenarioService(scenarioService);
+        sc.setBotUserService(botUserService);
         scenarioStack.push(sc);
         sc.start();
         return sc;
@@ -73,9 +75,10 @@ public class BotService {
         while(it.hasNext()){
             UserStack el = it.next();
             Scenario<String, StageParams> newScen = simpleScManager.getScenarioById(el.getScenarioId())
-                    .orElseThrow(()->new SWUException("Ошибка восстановления сеанса, сценарий '" + el.getScenarioId() + "' не найден"));
-            CommonScenario<String, StageParams> comScen  = (CommonScenario<String, StageParams> )newScen;
+                    .orElseThrow(()->new BotException("Ошибка восстановления сеанса, сценарий '" + el.getScenarioId() + "' не найден"));
+            CommonScenario comScen  = (CommonScenario )newScen;
             comScen.setScenarioService(scenarioService);
+            comScen.setBotUserService(botUserService);
             comScen.setBotService(this);
             comScen.load(currentChat.id());
             scenarioStack.push(comScen);
@@ -85,7 +88,7 @@ public class BotService {
     @Transactional
     public void saveChat() {
         int order = 1;
-        Iterator<Scenario<String, StageParams>> it = scenarioStack.iterator();
+        Iterator<CommonScenario> it = scenarioStack.iterator();
         scenarioService.deleteByChatId(currentChat.id());
         userStackRepository.deleteByChatId(currentChat.id());
         while(it.hasNext()){
@@ -104,7 +107,7 @@ public class BotService {
         if (!scenarioStack.empty()){
             Scenario<String, StageParams> sc = scenarioStack.peek();
             if(sc.getCurrentStage()==null){
-                endCurrentScenario();
+                endCurrentScenario(currentChat);
             }
         }
     }
@@ -114,20 +117,20 @@ public class BotService {
         if(scenarioStack.empty()) {
             Optional<BotUser> botUser = botUserService.getUserByChat(chat);
             if (botUser.isEmpty()) {
-                Scenario<String, StageParams> sc = startScenario("NewUserConnectedScenario", currentChat);
+                CommonScenario sc = startScenario("NewUserConnectedScenario", currentChat);
                 StageParams p = StageParams.builder().bot(bot).chat(chat).message(fullMes).request(request).build();
                 sc.doWork(p);
                 checkScenStack();
                 return;
             }else{
-                Scenario<String, StageParams> sc = startScenario("MainMenuScenario", currentChat);
+                CommonScenario sc = startScenario("MainMenuScenario", currentChat);
                 StageParams p = StageParams.builder().bot(bot).chat(chat).message(fullMes).request(request).build();
                 sc.doWork(p);
                 checkScenStack();
                 return;
             }
         }else{
-            Scenario<String, StageParams> sc = scenarioStack.peek();
+            CommonScenario sc = scenarioStack.peek();
             StageParams p = StageParams.builder().bot(bot).chat(chat).message(fullMes).request(request).build();
             sc.doWork(p);
             checkScenStack();
@@ -136,9 +139,11 @@ public class BotService {
 
     }
 
-    public void endCurrentScenario() {
+    public void endCurrentScenario(Chat chat) {
         if (!scenarioStack.empty()){
             scenarioStack.pop();
+            CommonScenario cs = scenarioStack.peek();
+            cs.resume(chat);
         }
     }
 
