@@ -122,7 +122,7 @@ public class ExtMessageService {
         }
     }
 
-    @Scheduled(cron = CRON)
+    //@Scheduled(cron = CRON)
     public void scheduledSender(){
         List<ExtMessage> messageList = getMessagesQueue(scheduleLimit);
         for (ExtMessage mes: messageList) {

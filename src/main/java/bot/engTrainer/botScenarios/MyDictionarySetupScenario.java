@@ -8,6 +8,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Chat;
+import com.pengrad.telegrambot.model.request.Keyboard;
+import com.pengrad.telegrambot.model.request.KeyboardButton;
+import com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup;
 import com.pengrad.telegrambot.request.SendMessage;
 
 import java.util.HashMap;
@@ -16,20 +19,14 @@ import java.util.Map;
 
 public class MyDictionarySetupScenario extends CommonScenario {
 
-    private ScenarioService scenarioService;
-    private BotService botService;
-
     public MyDictionarySetupScenario() {
         super();
         setScenarioId("MyDictionarySetupScenario");
     }
 
-    public void setScenarioService(ScenarioService scenarioService){
-        this.scenarioService = scenarioService;
-    }
+    private void showMainMenu(TelegramBot bot, Chat chat){
+        bot.execute(new SendMessage(chat.id(), "Вы находитесь в меню настройки словаря"));
 
-    public void setBotService(BotService botService){
-        this.botService = botService;
     }
 
     @Override
@@ -38,7 +35,7 @@ public class MyDictionarySetupScenario extends CommonScenario {
         SimpleScenarioStage<String, StageParams> st1 = new SimpleScenarioStage<>("1", (p) -> {
             Chat chat = p.getChat();
             TelegramBot bot = p.getBot();
-            bot.execute(new SendMessage(chat.id(), "Вы находитесь в меню настройки словаря"));
+            showMainMenu(bot, chat);
             return "2";
         });
 
@@ -54,5 +51,10 @@ public class MyDictionarySetupScenario extends CommonScenario {
 
     }
 
+    @Override
+    public void resume(Object param) {
+        TelegramBot bot = new TelegramBot(botService.getBotConfig().getToken());
+        showMainMenu(bot, botService.getCurrentChat());
+    }
 
 }

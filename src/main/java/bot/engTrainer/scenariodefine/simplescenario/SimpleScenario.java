@@ -2,6 +2,7 @@ package bot.engTrainer.scenariodefine.simplescenario;
 
 import bot.engTrainer.scenariodefine.Scenario;
 import bot.engTrainer.scenariodefine.ScenarioStage;
+import com.pengrad.telegrambot.model.Chat;
 import lombok.Getter;
 import lombok.Setter;
 

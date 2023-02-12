@@ -142,8 +142,15 @@ public class BotService {
     public void endCurrentScenario(Chat chat) {
         if (!scenarioStack.empty()){
             scenarioStack.pop();
-            CommonScenario cs = scenarioStack.peek();
-            cs.resume(chat);
+            if(scenarioStack.empty()){
+                CommonScenario sc = startScenario("MainMenuScenario", currentChat);
+                TelegramBot bot = new TelegramBot(botConfig.getToken());
+                StageParams p = StageParams.builder().bot(bot).chat(chat).build();
+                sc.doWork(p);
+            }else {
+                CommonScenario cs = scenarioStack.peek();
+                cs.resume(chat);
+            }
         }
     }
 

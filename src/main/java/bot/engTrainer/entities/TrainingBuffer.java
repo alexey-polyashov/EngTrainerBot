@@ -8,17 +8,17 @@ import javax.persistence.*;
 import java.sql.Date;
 
 @Entity
-@Table(name = "words")
+@Table(name = "training_buffer")
 @Getter
 @Setter
 @NoArgsConstructor
 public class TrainingBuffer {
 
     @Id
-    @Column(name = "id")
     private Long id;
 
-    @Column(name="bot_user")
+    @OneToOne(fetch = FetchType.LAZY)
+    @MapsId
     private BotUser botUser;
 
     @ManyToOne(fetch = FetchType.EAGER)

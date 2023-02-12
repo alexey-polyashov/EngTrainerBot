@@ -21,40 +21,31 @@ public class TrainingScenario extends CommonScenario {
     static final String msg_training_ready = "Start";
     static final String msg_training_ready_cmd = "/start";
 
-
-    private ScenarioService scenarioService;
-    private BotService botService;
-
     public TrainingScenario() {
         super();
         setScenarioId("TrainingScenario");
     }
 
-    public void setScenarioService(ScenarioService scenarioService){
-        this.scenarioService = scenarioService;
-    }
-
-    public void setBotService(BotService botService){
-        this.botService = botService;
+    private void showMainMenu(TelegramBot bot, Chat chat){
+        Keyboard keyboard = new ReplyKeyboardMarkup(
+                new KeyboardButton(msg_training_ready),
+                new KeyboardButton(msg_help),
+                new KeyboardButton(msg_mainmenu))
+                .oneTimeKeyboard(true)   // optional
+                .resizeKeyboard(true)    // optional
+                .selective(true);        // optional
+        bot.execute(new SendMessage(chat.id(),"Вы находитесь "));
+        bot.execute(new SendMessage(chat.id(),"Тренировка займет некоторое время."));
+        bot.execute(new SendMessage(chat.id(),"Для начала тренировки нужно выбрать '" + msg_training_ready + "'").replyMarkup(keyboard));
     }
 
     @Override
     public void init() {
 
         SimpleScenarioStage<String, StageParams> st1 = new SimpleScenarioStage<>("1", (p) -> {
-
             Chat chat = p.getChat();
             TelegramBot bot = p.getBot();
-
-            Keyboard keyboard = new ReplyKeyboardMarkup(
-                    new KeyboardButton(msg_training_ready),
-                    new KeyboardButton(msg_help),
-                    new KeyboardButton(msg_mainmenu))
-                    .oneTimeKeyboard(true)   // optional
-                    .resizeKeyboard(true)    // optional
-                    .selective(true);        // optional
-            bot.execute(new SendMessage(chat.id(),"Тренировка займет некоторое время."));
-            bot.execute(new SendMessage(chat.id(),"Готов?").replyMarkup(keyboard));
+            showMainMenu(bot, chat);
             return "2";
         });
 
@@ -104,6 +95,12 @@ public class TrainingScenario extends CommonScenario {
         addStage(st2);
         addStage(st30);
 
+    }
+
+    @Override
+    public void resume(Object param) {
+        TelegramBot bot = new TelegramBot(botService.getBotConfig().getToken());
+        showMainMenu(bot, botService.getCurrentChat());
     }
 
 

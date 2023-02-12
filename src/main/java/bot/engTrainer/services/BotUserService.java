@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -41,11 +42,11 @@ public class BotUserService {
             return botUserMapper.toDto(botUser.get());
         }
         BotUser newUser = new BotUser();
-        newUser.getRoles().add(
-                roleRepository.findByName("USER").orElseThrow(()->new ResourceNotFound("Роль USER не найдена")));
+        List<Roles> roles = new ArrayList<>();
+        roles.add(roleRepository.findByName("USER").orElseThrow(()->new ResourceNotFound("Роль USER не найдена")));
+        newUser.setRoles(roles);
         newUser.setName(name);
         newUser.setChatId(chat.id());
-        newUser.setEmail("");
         newUser.setEmail(email);
         newUser.setMarked(false);
         botUserRepository.save(newUser);

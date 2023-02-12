@@ -19,7 +19,6 @@ import java.util.*;
 
 public class SettingsScenario extends CommonScenario {
 
-    private BotUserService botUserService;
     private DictionaryService dictionaryService;
 
     static final String msg_settings_training_time = "Training intervals";
@@ -56,6 +55,18 @@ public class SettingsScenario extends CommonScenario {
         setScenarioId("SettingsScenario");
     }
 
+    private void showMainMenu(TelegramBot bot, Chat chat){
+        Keyboard keyboard = new ReplyKeyboardMarkup(
+                new KeyboardButton(msg_settings_training_time),
+                new KeyboardButton(msg_settings_intensive),
+                new KeyboardButton(msg_help),
+                new KeyboardButton(msg_settings_mainmenu))
+                .oneTimeKeyboard(true)   // optional
+                .resizeKeyboard(true)    // optional
+                .selective(true);        // optional
+        bot.execute(new SendMessage(chat.id(),"Вы находитесь в разделе настроек").replyMarkup(keyboard));
+    }
+
     @Override
     public void init() {
 
@@ -64,15 +75,7 @@ public class SettingsScenario extends CommonScenario {
             Chat chat = p.getChat();
             TelegramBot bot = p.getBot();
 
-            Keyboard keyboard = new ReplyKeyboardMarkup(
-                    new KeyboardButton(msg_settings_training_time),
-                    new KeyboardButton(msg_settings_intensive),
-                    new KeyboardButton(msg_help),
-                    new KeyboardButton(msg_settings_mainmenu))
-                    .oneTimeKeyboard(true)   // optional
-                    .resizeKeyboard(true)    // optional
-                    .selective(true);        // optional
-            bot.execute(new SendMessage(chat.id(),"Вы находитесь в разделе настроек").replyMarkup(keyboard));
+            showMainMenu(bot, chat);
 
             return "2";
 
@@ -488,6 +491,12 @@ public class SettingsScenario extends CommonScenario {
         addStage(st50);
         addStage(st51);
 
+    }
+
+    @Override
+    public void resume(Object param) {
+        TelegramBot bot = new TelegramBot(botService.getBotConfig().getToken());
+        showMainMenu(bot, botService.getCurrentChat());
     }
 
 

@@ -11,10 +11,6 @@ import com.pengrad.telegrambot.request.SendMessage;
 
 public class NewUserConnectedScenario extends CommonScenario {
 
-    private ScenarioService scenarioService;
-    private BotService botService;
-    private BotUserService botUserService;
-
     public NewUserConnectedScenario() {
         super();
         setScenarioId("NewUserConnectedScenario");
@@ -40,6 +36,8 @@ public class NewUserConnectedScenario extends CommonScenario {
             TelegramBot bot = p.getBot();
             bot.execute(new SendMessage(chat.id(), "Добро пожаловать в чат для тренировки английского!"));
             bot.execute(new SendMessage(chat.id(), "Для начала необходимо пройти простую процедуру регистрации!"));
+            goToStage("2");
+            doWork(p);
             return "2";
         });
 
@@ -61,7 +59,7 @@ public class NewUserConnectedScenario extends CommonScenario {
                 return null;
             }catch(Exception e){
                 bot.execute(new SendMessage(chat.id(), "Призошла ошибка. Повторите ввод, или напишите разработчикам polyashofff@yandex.ru"));
-                return "2";
+                return "3";
             }
         });
 
