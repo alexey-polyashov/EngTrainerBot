@@ -34,7 +34,7 @@ public class TrainingScenario extends CommonScenario {
                 .oneTimeKeyboard(true)   // optional
                 .resizeKeyboard(true)    // optional
                 .selective(true);        // optional
-        bot.execute(new SendMessage(chat.id(),"Вы находитесь "));
+        bot.execute(new SendMessage(chat.id(),"Вы находитесь в разделе тренировок"));
         bot.execute(new SendMessage(chat.id(),"Тренировка займет некоторое время."));
         bot.execute(new SendMessage(chat.id(),"Для начала тренировки нужно выбрать '" + msg_training_ready + "'").replyMarkup(keyboard));
     }
@@ -63,7 +63,6 @@ public class TrainingScenario extends CommonScenario {
                     return "30";
                 case msg_mainmenu:
                 case msg_mainmenu_cmd:
-                    bot.execute(new SendMessage(chat.id(), "Вы вернулись в главное меню"));
                     return null;
                 case msg_help:
                 case msg_help_cmd:

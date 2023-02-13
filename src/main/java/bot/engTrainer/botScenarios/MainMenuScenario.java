@@ -32,7 +32,7 @@ public class MainMenuScenario extends CommonScenario {
                 new KeyboardButton(msg_select_dictionary),
                 new KeyboardButton(msg_settings),
                 new KeyboardButton(msg_help))
-                .oneTimeKeyboard(true)   // optional
+                .oneTimeKeyboard(false)   // optional
                 .resizeKeyboard(true)    // optional
                 .selective(true);        // optional
         bot.execute(new SendMessage(chat.id(),"Вы находитесь в главном меню").replyMarkup(keyboard));

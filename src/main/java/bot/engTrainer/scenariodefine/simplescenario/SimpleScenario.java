@@ -58,15 +58,16 @@ public abstract class SimpleScenario<T, P> implements Scenario<T, P> {
         if(currentStage!=null) {
             nextStage = currentStage.getNextStage(stageParams);
         }
-        nextStage.ifPresentOrElse(
-                (v)-> {
-                    if (!v.equals(currentStage.getIdentifier())) {
-                        goToStage(v);
-                        checkEndState();
-                    }
-                },
-                this::goToEnd
-        );
+        if(nextStage.isPresent()){
+            T next = nextStage.get();
+            if (!next.equals(currentStage.getIdentifier())) {
+                goToStage(next);
+                checkEndState();
+            }
+        }else{
+            this.goToEnd();
+        }
+
     }
 
     public void resume(Object param){

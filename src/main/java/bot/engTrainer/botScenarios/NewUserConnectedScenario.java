@@ -7,8 +7,9 @@ import bot.engTrainer.services.ScenarioService;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.request.SendMessage;
+import lombok.extern.slf4j.Slf4j;
 
-
+@Slf4j
 public class NewUserConnectedScenario extends CommonScenario {
 
     public NewUserConnectedScenario() {
@@ -58,6 +59,7 @@ public class NewUserConnectedScenario extends CommonScenario {
                 botUserService.registerNewUser(chat, userName.trim(), "");
                 return null;
             }catch(Exception e){
+                log.error(e.toString());
                 bot.execute(new SendMessage(chat.id(), "Призошла ошибка. Повторите ввод, или напишите разработчикам polyashofff@yandex.ru"));
                 return "3";
             }

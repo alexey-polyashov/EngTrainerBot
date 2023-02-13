@@ -12,9 +12,9 @@ public class SimpleScManagerConfig extends SimpleScManager<String, StageParams> 
     private void init(){
         this.attach(NewUserConnectedScenario.class, "NewUserConnectedScenario");
         this.attach(TrainingScenario.class, "TrainingScenario");
-        this.attach(TrainingScenario.class, "MyDictionarySetupScenario");
-        this.attach(TrainingScenario.class, "SettingsScenario");
-        this.attach(TrainingScenario.class, "MainMenuScenario");
+        this.attach(MyDictionarySetupScenario.class, "MyDictionarySetupScenario");
+        this.attach(SettingsScenario.class, "SettingsScenario");
+        this.attach(MainMenuScenario.class, "MainMenuScenario");
     }
 
 }
