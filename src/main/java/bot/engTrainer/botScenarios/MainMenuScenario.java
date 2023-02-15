@@ -73,7 +73,7 @@ public class MainMenuScenario extends CommonScenario {
                 bot.execute(new SendMessage(chat.id(), "Я вас не понимаю. Выберите пункт меню и действуюте по инструкциям."));
                 goToStage("1");
                 doWork(p);
-                return "1";
+                return "2";
             }
 
         });
@@ -87,7 +87,7 @@ public class MainMenuScenario extends CommonScenario {
             bot.execute(new SendMessage(chat.id(), "Вы вернулись в главное меню."));
             goToStage("1");
             doWork(p);
-            return "1";
+            return "2";
 
         });
 

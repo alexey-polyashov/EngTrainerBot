@@ -39,7 +39,7 @@ public class NewUserConnectedScenario extends CommonScenario {
             bot.execute(new SendMessage(chat.id(), "Для начала необходимо пройти простую процедуру регистрации!"));
             goToStage("2");
             doWork(p);
-            return "2";
+            return "3";
         });
 
         SimpleScenarioStage<String, StageParams> st2 = new SimpleScenarioStage<>("2", (p) -> {

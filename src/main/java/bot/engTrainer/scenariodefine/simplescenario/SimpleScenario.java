@@ -90,10 +90,9 @@ public abstract class SimpleScenario<T, P> implements Scenario<T, P> {
 
     @Override
     public void goToStage(T stageId) {
-        getStage(stageId).ifPresent((v)-> {
-                                            this.currentStage = v;
-                                            checkEndState();
-        });
+        Optional<ScenarioStage<T, P>> stage = getStage(stageId);
+        this.currentStage = stage.orElse(null);
+        checkEndState();
     }
 
     @Override

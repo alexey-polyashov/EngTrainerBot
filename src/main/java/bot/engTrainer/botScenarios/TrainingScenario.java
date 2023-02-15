@@ -60,7 +60,7 @@ public class TrainingScenario extends CommonScenario {
                 case msg_training_ready_cmd:
                     goToStage("30");
                     doWork(p);
-                    return "30";
+                    return null;
                 case msg_mainmenu:
                 case msg_mainmenu_cmd:
                     return null;
@@ -75,7 +75,7 @@ public class TrainingScenario extends CommonScenario {
                     bot.execute(new SendMessage(chat.id(), "Я вас не понимаю. Выберите пункт меню."));
                     goToStage("1");
                     doWork(p);
-                    return "1";
+                    return "2";
             }
 
         });

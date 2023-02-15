@@ -110,7 +110,7 @@ public class SettingsScenario extends CommonScenario {
                 bot.execute(new SendMessage(chat.id(), "Я вас не понимаю. Выберите пункт меню."));
                 goToStage("1");
                 doWork(p);
-                return "1";
+                return "2";
             }
 
         });
@@ -206,7 +206,7 @@ public class SettingsScenario extends CommonScenario {
                 bot.execute(new SendMessage(chat.id(), "Я вас не понимаю. Выберите пункт меню."));
                 goToStage("30");
                 doWork(p);
-                return "30";
+                return "31";
             }
 
         });
@@ -220,7 +220,7 @@ public class SettingsScenario extends CommonScenario {
             if(mes.equals(msg_settings_back) || mes.equals(msg_settings_back_cmd)){
                 goToStage("30");
                 doWork(p);
-                return "30";
+                return "31";
             }else if(!mes.isEmpty()){
                 mes=mes.trim();
                 int hour = 0;
@@ -351,7 +351,7 @@ public class SettingsScenario extends CommonScenario {
                 case msg_settings_back_cmd:
                     goToStage("1");
                     doWork(p);
-                    return "1";
+                    return "2";
                 case msg_help:
                 case msg_help_cmd:
                     bot.execute(new SendMessage(chat.id(), "Вы находитесь в разделе выбора словарей"));
@@ -362,7 +362,7 @@ public class SettingsScenario extends CommonScenario {
                     bot.execute(new SendMessage(chat.id(), "Я вас не понимаю. Выберите пункт меню."));
                     goToStage("40");
                     doWork(p);
-                    return "40";
+                    return "41";
             }
 
         });
@@ -377,7 +377,7 @@ public class SettingsScenario extends CommonScenario {
             if(mes.equals(msg_settings_back) || mes.equals(msg_settings_back_cmd)){
                 goToStage("40");
                 doWork(p);
-                return "40";
+                return "41";
             }else if(mesParts[0].equals("plug")){
                 long id = Long.parseLong(mesParts[1]);
                 Dictionaries dict = dictionaryService.getById(id);
@@ -401,7 +401,7 @@ public class SettingsScenario extends CommonScenario {
             if(mes.equals(msg_settings_back) || mes.equals(msg_settings_back_cmd)){
                 goToStage("40");
                 doWork(p);
-                return "40";
+                return "41";
             }else if(mesParts[0].equals("unplug")){
                 long id = Long.parseLong(mesParts[1]);
                 Dictionaries dict = dictionaryService.getById(id);
@@ -450,7 +450,7 @@ public class SettingsScenario extends CommonScenario {
             if(mes.equals(msg_settings_back) || mes.equals(msg_settings_back_cmd)){
                 goToStage("1");
                 doWork(p);
-                return "1";
+                return "2";
             }else if(!mes.isEmpty()){
                 mes=mes.trim();
                 int intensity = 0;
@@ -470,7 +470,7 @@ public class SettingsScenario extends CommonScenario {
                 }
                 goToStage("1");
                 doWork(p);
-                return "1";
+                return "2";
             }else{
                 bot.execute(new SendMessage(chat.id(), "Я вас не понимаю. Для изменения введите целое число в диапазоне от 1 до 50, равное количеству слов в день, которое вы хотите изучать. Для отмены изменений вернитесь назад."));
                 return "51";

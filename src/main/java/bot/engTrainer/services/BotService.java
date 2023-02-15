@@ -113,9 +113,9 @@ public class BotService {
     }
 
     public void doWork(String mes, TelegramBot bot, Chat chat, Message fullMes, TelegramRequest request, String opt) throws Throwable {
-
-        if(scenarioStack.empty()) {
+        if(scenarioStack.empty() || mes.equals("/start")) {
             Optional<BotUser> botUser = botUserService.getUserByChat(chat);
+            scenarioStack.clear();
             if (botUser.isEmpty()) {
                 CommonScenario sc = startScenario("NewUserConnectedScenario", currentChat);
                 StageParams p = StageParams.builder().bot(bot).chat(chat).message(fullMes).request(request).build();
