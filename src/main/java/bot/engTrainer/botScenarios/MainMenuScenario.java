@@ -100,6 +100,7 @@ public class MainMenuScenario extends CommonScenario {
     @Override
     public void resume(Object param) {
         TelegramBot bot = new TelegramBot(botService.getBotConfig().getToken());
+        goToStage("2");
         showMainMenu(bot, botService.getCurrentChat());
     }
 

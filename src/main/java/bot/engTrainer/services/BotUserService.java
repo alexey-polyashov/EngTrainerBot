@@ -13,6 +13,7 @@ import bot.engTrainer.exceptions.ResourceNotFound;
 import bot.engTrainer.repository.BotUserRepository;
 import bot.engTrainer.repository.DictionaryRepository;
 import bot.engTrainer.repository.RoleRepository;
+import bot.engTrainer.repository.TrainingIntervalsRepository;
 import com.pengrad.telegrambot.model.Chat;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +35,7 @@ public class BotUserService {
     private final RoleRepository roleRepository;
     private final BotUserRepository botUserRepository;
     private final DictionaryRepository dictionaryRepository;
+    private final TrainingIntervalsRepository trainingIntervalsRepository;
 
 
     public BotUserDto registerNewUser(Chat chat, String name, String email){
@@ -74,19 +76,19 @@ public class BotUserService {
     public Set<TrainingIntervals> getUserTrainingIntervals(Chat chat){
         BotUser botUser = botUserRepository.findByChatId(chat.id())
                 .orElseThrow(()->new ResourceNotFound("Пользователь с id '" + chat.id() + "' не найден"));
+        int s = botUser.getTrainingIntervals().size();
         return botUser.getTrainingIntervals();
     }
 
     @Transactional
-    public void addUserTrainingIntervals(Chat chat, int hour){
+    public void addUserTrainingInterval(Chat chat, int hour){
         BotUser botUser = botUserRepository.findByChatId(chat.id())
                 .orElseThrow(()->new ResourceNotFound("Пользователь с id '" + chat.id() + "' не найден"));
         for (TrainingIntervals interval:botUser.getTrainingIntervals()){
             if(interval.getStartHour()==hour) return;
         }
         TrainingIntervals interval = new TrainingIntervals(botUser.getId(), hour);
-        botUser.getTrainingIntervals().add(interval);
-        botUserRepository.save(botUser);
+        trainingIntervalsRepository.save(interval);
     }
 
     @Transactional
@@ -101,7 +103,6 @@ public class BotUserService {
         }
         if(interval!=null) {
             botUser.getTrainingIntervals().remove(interval);
-            botUserRepository.save(botUser);
         }
     }
 

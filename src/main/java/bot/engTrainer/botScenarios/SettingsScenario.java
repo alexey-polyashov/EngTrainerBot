@@ -3,12 +3,8 @@ package bot.engTrainer.botScenarios;
 import bot.engTrainer.entities.BotUser;
 import bot.engTrainer.entities.Dictionaries;
 import bot.engTrainer.entities.TrainingIntervals;
-import bot.engTrainer.scenariodefine.Scenario;
 import bot.engTrainer.scenariodefine.simplescenario.SimpleScenarioStage;
-import bot.engTrainer.services.BotService;
-import bot.engTrainer.services.BotUserService;
 import bot.engTrainer.services.DictionaryService;
-import bot.engTrainer.services.ScenarioService;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.request.*;
@@ -88,18 +84,18 @@ public class SettingsScenario extends CommonScenario {
             String mes = p.getMessage().text();
 
             if(mes.equals(msg_settings_training_time) || mes.equals(msg_settings_training_time_cmd)){
-                Scenario<String, StageParams> sc = botService.startScenario("SettingsScenario", chat);
-                sc.doWork(p);
-                botService.checkScenStack();
-                return "30";
+                goToStage("30");
+                doWork(p);
+                return "31";
             }else if(mes.equals(msg_settings_dictionaries) || mes.equals(msg_settings_dictionaries_cmd)){
-                bot.execute(new SendMessage(chat.id(), "Вы вошли в меню выбора словарей. Выберите пункт в меню для настройки словарей"));
-                return "40";
+                goToStage("40");
+                doWork(p);
+                return "41";
             }else if(mes.equals(msg_settings_intensive) || mes.equals(msg_settings_intensive_cmd)){
-                bot.execute(new SendMessage(chat.id(), "Вы вошли в меню настройки интенсивности тренировок"));
-                return "50";
+                goToStage("50");
+                doWork(p);
+                return "51";
             }else if(mes.equals(msg_settings_mainmenu) || mes.equals(msg_settings_mainmenu_cmd)){
-                bot.execute(new SendMessage(chat.id(), "Вы вернулись в главное меню"));
                 return null;
             }else if(mes.equals(msg_help) || mes.equals(msg_help_cmd)){
                 bot.execute(new SendMessage(chat.id(), "Вы находитесь в разделе настроек"));
@@ -120,7 +116,6 @@ public class SettingsScenario extends CommonScenario {
 
             Chat chat = p.getChat();
             TelegramBot bot = p.getBot();
-            String mes = p.getMessage().text();
 
             Keyboard keyboard = new ReplyKeyboardMarkup(
                 new KeyboardButton(msg_settings_training_time_show),
@@ -148,10 +143,14 @@ public class SettingsScenario extends CommonScenario {
             if(mes.equals(msg_settings_training_time_show) || mes.equals(msg_settings_training_time_show_cmd)){
                 Set<TrainingIntervals> intervals = botUserService.getUserTrainingIntervals(chat);
                 int count = 1;
-                for (TrainingIntervals interval: intervals) {
-                    bot.execute(new SendMessage(chat.id(), "№" + (count++) + " - " + interval.getStartHour() + " ч."));
+                if(intervals.size()==0){
+                    bot.execute(new SendMessage(chat.id(), "Интервалы тренировок не заданы"));
+                }else {
+                    for (TrainingIntervals interval : intervals) {
+                        bot.execute(new SendMessage(chat.id(), "№" + (count++) + " - " + interval.getStartHour() + " ч."));
+                    }
                 }
-                return "30";
+                return "31";
             }else if(mes.equals(msg_settings_training_time_add) || mes.equals(msg_settings_training_time_add_cmd)){
                 Keyboard keyboard = new ReplyKeyboardMarkup(
                         new KeyboardButton(msg_settings_back)
@@ -171,10 +170,12 @@ public class SettingsScenario extends CommonScenario {
                 SendMessage sm = new SendMessage(chat.id(), "Выберите интервал для удаления").parseMode(ParseMode.HTML);
                 Set<TrainingIntervals> intervals = botUserService.getUserTrainingIntervals(chat);
                 int count = 1;
+                InlineKeyboardMarkup kbd = new InlineKeyboardMarkup();
                 for (TrainingIntervals interval: intervals) {
                     InlineKeyboardButton kbDelServ = new  InlineKeyboardButton("№" + count++ + " - " + interval.getStartHour() + " ч.").callbackData("del#" + interval.getStartHour());
-                    sm.replyMarkup(new InlineKeyboardMarkup(kbDelServ));
+                    kbd.addRow(kbDelServ);
                 }
+                sm.replyMarkup(kbd);
                 bot.execute(sm);
                 return "33";
             }else if(mes.equals(msg_settings_training_time_clr) || mes.equals(msg_settings_training_time_clr_cmd)){
@@ -196,12 +197,12 @@ public class SettingsScenario extends CommonScenario {
             }else if(mes.equals(msg_settings_back) || mes.equals(msg_settings_back_cmd)){
                 goToStage("1");
                 doWork(p);
-                return "1";
+                return "2";
             }else if(mes.equals(msg_help) || mes.equals(msg_help_cmd)){
                 bot.execute(new SendMessage(chat.id(), "Вы находитесь в разделе настроекинтервалов тнировок"));
                 bot.execute(new SendMessage(chat.id(), "Здесь вы можете посмотреть настроенные интервалы, добавить новые, удалить выбранный интервал или все сразу."));
                 bot.execute(new SendMessage(chat.id(), "Если заданы интервалы тренировок, бот будет предлагать начать тренировку в эти временные интервалы. Если нет заданных интервалов, бот не будет предлагать тренировку."));
-                return "30";
+                return "31";
             }else{
                 bot.execute(new SendMessage(chat.id(), "Я вас не понимаю. Выберите пункт меню."));
                 goToStage("30");
@@ -231,12 +232,11 @@ public class SettingsScenario extends CommonScenario {
                         bot.execute(new SendMessage(chat.id(), "Введите целое число от 1 до 24"));
                     }
                 }
-                Set<TrainingIntervals> intervals = botUserService.getUserTrainingIntervals(chat);
-                int count = 1;
-                for (TrainingIntervals interval: intervals) {
-                    bot.execute(new SendMessage(chat.id(), "№" + (count++) + " - " + interval.getStartHour() + " ч."));
-                }
-                return "30";
+                botUserService.addUserTrainingInterval(chat, hour);
+                bot.execute(new SendMessage(chat.id(), "Тренировка на " + hour + "ч. добавлена"));
+                goToStage("30");
+                doWork(p);
+                return "31";
             }else{
                 bot.execute(new SendMessage(chat.id(), "Я вас не понимаю. Введите час начала нового интервала (число от 1 до 24), или вернитесь в меню настроек интервалов."));
                 return "32";
@@ -248,22 +248,63 @@ public class SettingsScenario extends CommonScenario {
 
             Chat chat = p.getChat();
             TelegramBot bot = p.getBot();
-            String[] mesParts = p.getMessage().text().split("#");
+
+            if(p.getMessage()!=null){
+                String mes = p.getMessage().text();
+                if(mes.equals(msg_settings_back) || mes.equals(msg_settings_back_cmd)){
+                    goToStage("30");
+                    doWork(p);
+                    return "31";
+                }
+            }
+
+            String[] mesParts = p.getRequest().getText().split("#");
             switch (mesParts[0]) {
                 case "del":
                     String sHour = mesParts[1];
                     int iHour = Integer.parseInt(sHour);
                     if(iHour>0 && iHour<=24){
                         botUserService.delUserTrainingIntervals(chat, iHour);
-                        bot.execute(new SendMessage(chat.id(), "Интервал тренировки на " + iHour + " удален"));
+                        bot.execute(new SendMessage(chat.id(), "Интервал тренировки на " + iHour + "ч. удален"));
                         goToStage("30");
                         doWork(p);
                         return "31";
                     }
                 default:
                     bot.execute(new SendMessage(chat.id(), "Извините, я вас не понял"));
-                    bot.execute(new SendMessage(chat.id(), "Выберите интервал для удаления, или енитесь назад"));
+                    bot.execute(new SendMessage(chat.id(), "Выберите интервал для удаления, или вернитесь назад"));
                     return "33";
+            }
+        });
+
+        SimpleScenarioStage<String, StageParams> st34 = new SimpleScenarioStage<>("34", (p) -> {
+
+            Chat chat = p.getChat();
+            TelegramBot bot = p.getBot();
+
+            if(p.getMessage()!=null){
+                String mes = p.getMessage().text();
+                if(mes.equals(msg_settings_back) || mes.equals(msg_settings_back_cmd)){
+                    goToStage("30");
+                    doWork(p);
+                    return "31";
+                }
+            }
+
+            String[] mesParts = p.getRequest().getText().split("#");
+            switch (mesParts[0]) {
+                case "clr":
+                    if(mesParts[1].equals("yes")){
+                        botUserService.clearUserTrainingIntervals(chat);
+                        bot.execute(new SendMessage(chat.id(), "Интервалы тренировок удалены"));
+                        goToStage("30");
+                        doWork(p);
+                        return "31";
+                    }
+                default:
+                    bot.execute(new SendMessage(chat.id(), "Извините, я вас не понял"));
+                    bot.execute(new SendMessage(chat.id(), "Нажмите 'YES' для очистки интервалов тренировок, или вернитесь назад"));
+                    return "34";
             }
         });
 
@@ -283,7 +324,7 @@ public class SettingsScenario extends CommonScenario {
                     .oneTimeKeyboard(true)   // optional
                     .resizeKeyboard(true)    // optional
                     .selective(true);        // optional
-            bot.execute(new SendMessage(chat.id(),"Вы находитесь в разделе настройки интервалов тренировок").replyMarkup(keyboard));
+            bot.execute(new SendMessage(chat.id(),"Вы находитесь в разделе настройки интервалов словарей").replyMarkup(keyboard));
 
             return "41";
 
@@ -424,12 +465,13 @@ public class SettingsScenario extends CommonScenario {
             TelegramBot bot = p.getBot();
             String mes = p.getMessage().text();
             Optional<BotUser> botUser = botUserService.getUserByChat(chat);
+            bot.execute(new SendMessage(chat.id(), "Вы в разделе настройки интенсивности тренировок"));
             Keyboard keyboard = new ReplyKeyboardMarkup(
                     new KeyboardButton(msg_settings_back)
-            )
-                    .oneTimeKeyboard(true)   // optional
-                    .resizeKeyboard(true)    // optional
-                    .selective(true);        // optional
+                )
+                .oneTimeKeyboard(true)   // optional
+                .resizeKeyboard(true)    // optional
+                .selective(true);        // optional
             if(botUser.isPresent()){
                 bot.execute(new SendMessage(chat.id(),"Ваша текущая интенсивность тренировок - " + botUser.get().getTrainigIntensity() + " слов в день").replyMarkup(keyboard));
                 bot.execute(new SendMessage(chat.id(),"Для изменения введите целое число в диапазоне от 1 до 50, равное количеству слов в день, которое вы хотите изучать. Для отмены изменений вернитесь назад.").replyMarkup(keyboard));
@@ -467,6 +509,7 @@ public class SettingsScenario extends CommonScenario {
                     BotUser entity = botUser.get();
                     entity.setTrainigIntensity(intensity);
                     botUserService.saveBotUser(entity);
+                    bot.execute(new SendMessage(chat.id(), "Установлена интенсивность тренировок - " + intensity));
                 }
                 goToStage("1");
                 doWork(p);
@@ -484,6 +527,7 @@ public class SettingsScenario extends CommonScenario {
         addStage(st31);
         addStage(st32);
         addStage(st33);
+        addStage(st34);
         addStage(st40);
         addStage(st41);
         addStage(st42);
@@ -496,6 +540,7 @@ public class SettingsScenario extends CommonScenario {
     @Override
     public void resume(Object param) {
         TelegramBot bot = new TelegramBot(botService.getBotConfig().getToken());
+        goToStage("2");
         showMainMenu(bot, botService.getCurrentChat());
     }
 

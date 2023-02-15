@@ -15,6 +15,7 @@ import javax.persistence.*;
 public class TrainingIntervals {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
 

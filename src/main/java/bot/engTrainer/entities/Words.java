@@ -16,6 +16,7 @@ public class Words {
 
     @Id
     @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name="foreign_write")
