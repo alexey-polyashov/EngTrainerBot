@@ -55,9 +55,10 @@ public class SettingsScenario extends CommonScenario {
         Keyboard keyboard = new ReplyKeyboardMarkup(
                 new KeyboardButton(msg_settings_training_time),
                 new KeyboardButton(msg_settings_intensive),
+                new KeyboardButton(msg_settings_dictionaries),
                 new KeyboardButton(msg_help),
                 new KeyboardButton(msg_settings_mainmenu))
-                .oneTimeKeyboard(true)   // optional
+                .oneTimeKeyboard(false)   // optional
                 .resizeKeyboard(true)    // optional
                 .selective(true);        // optional
         bot.execute(new SendMessage(chat.id(),"Вы находитесь в разделе настроек").replyMarkup(keyboard));
@@ -125,7 +126,7 @@ public class SettingsScenario extends CommonScenario {
                 new KeyboardButton(msg_help),
                 new KeyboardButton(msg_settings_back)
             )
-            .oneTimeKeyboard(true)   // optional
+            .oneTimeKeyboard(false)   // optional
             .resizeKeyboard(true)    // optional
             .selective(true);        // optional
             bot.execute(new SendMessage(chat.id(),"Вы находитесь в разделе настройки интервалов тренировок").replyMarkup(keyboard));
@@ -155,7 +156,7 @@ public class SettingsScenario extends CommonScenario {
                 Keyboard keyboard = new ReplyKeyboardMarkup(
                         new KeyboardButton(msg_settings_back)
                 )
-                .oneTimeKeyboard(true)   // optional
+                .oneTimeKeyboard(false)   // optional
                 .resizeKeyboard(true)    // optional
                 .selective(true);        // optional
                 bot.execute(new SendMessage(chat.id(), "Введите час начала интервала (число от 1 до 24)").replyMarkup(keyboard));
@@ -164,7 +165,7 @@ public class SettingsScenario extends CommonScenario {
                 Keyboard keyboard = new ReplyKeyboardMarkup(
                         new KeyboardButton(msg_settings_back)
                 )
-                        .oneTimeKeyboard(true)   // optional
+                        .oneTimeKeyboard(false)   // optional
                         .resizeKeyboard(true)    // optional
                         .selective(true);        // optional
                 SendMessage sm = new SendMessage(chat.id(), "Выберите интервал для удаления").parseMode(ParseMode.HTML);
@@ -182,7 +183,7 @@ public class SettingsScenario extends CommonScenario {
                 Keyboard keyboard = new ReplyKeyboardMarkup(
                         new KeyboardButton(msg_settings_back)
                 )
-                        .oneTimeKeyboard(true)   // optional
+                        .oneTimeKeyboard(false)   // optional
                         .resizeKeyboard(true)    // optional
                         .selective(true);        // optional
                 SendMessage sm = new SendMessage(chat.id(), "Подтвердите очистку интервалов тренировки. Нажмите YES").parseMode(ParseMode.HTML);
@@ -321,7 +322,7 @@ public class SettingsScenario extends CommonScenario {
                     new KeyboardButton(msg_help),
                     new KeyboardButton(msg_settings_back)
             )
-                    .oneTimeKeyboard(true)   // optional
+                    .oneTimeKeyboard(false)   // optional
                     .resizeKeyboard(true)    // optional
                     .selective(true);        // optional
             bot.execute(new SendMessage(chat.id(),"Вы находитесь в разделе настройки интервалов словарей").replyMarkup(keyboard));
@@ -363,7 +364,7 @@ public class SettingsScenario extends CommonScenario {
                     Keyboard keyboard = new ReplyKeyboardMarkup(
                             new KeyboardButton(msg_settings_back)
                     )
-                            .oneTimeKeyboard(true)   // optional
+                            .oneTimeKeyboard(false)   // optional
                             .resizeKeyboard(true)    // optional
                             .selective(true);        // optional
 
@@ -382,7 +383,7 @@ public class SettingsScenario extends CommonScenario {
                     Keyboard keyboard = new ReplyKeyboardMarkup(
                             new KeyboardButton(msg_settings_back)
                     )
-                            .oneTimeKeyboard(true)   // optional
+                            .oneTimeKeyboard(false)   // optional
                             .resizeKeyboard(true)    // optional
                             .selective(true);        // optional
 
@@ -469,7 +470,7 @@ public class SettingsScenario extends CommonScenario {
             Keyboard keyboard = new ReplyKeyboardMarkup(
                     new KeyboardButton(msg_settings_back)
                 )
-                .oneTimeKeyboard(true)   // optional
+                .oneTimeKeyboard(false)   // optional
                 .resizeKeyboard(true)    // optional
                 .selective(true);        // optional
             if(botUser.isPresent()){

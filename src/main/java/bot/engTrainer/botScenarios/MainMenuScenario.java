@@ -57,13 +57,15 @@ public class MainMenuScenario extends CommonScenario {
             if(mes.equals(msg_settings) || mes.equals(msg_settings_cmd)){
                 Scenario<String, StageParams> sc = botService.startScenario("SettingsScenario", chat);
                 sc.doWork(p);
-                return "7";
+                return null;
             }else if(mes.equals(msg_select_dictionary) || mes.equals(msg_select_dictionary_cmd)){
-                bot.execute(new SendMessage(chat.id(), "Вы вошли в меню выбора словарей. Выберите аункт в меню для настройки словарей"));
-                return "4";
+                Scenario<String, StageParams> sc = botService.startScenario("MyDictionarySetupScenario", chat);
+                sc.doWork(p);
+                return null;
             }else if(mes.equals(msg_start_training) || mes.equals(msg_start_training_cmd)){
-                bot.execute(new SendMessage(chat.id(), "Тренировка начинается"));
-                return "5";
+                Scenario<String, StageParams> sc = botService.startScenario("TrainingScenario", chat);
+                sc.doWork(p);
+                return null;
             }else if(mes.equals(msg_help) || mes.equals(msg_help_cmd)){
                 bot.execute(new SendMessage(chat.id(), "Вы находитесь в главном меню"));
                 bot.execute(new SendMessage(chat.id(), "Вы можете выполнить настройки своего профиля, подключить словари для тренировки, или начать трнировку прямо сейчас."));
@@ -79,16 +81,11 @@ public class MainMenuScenario extends CommonScenario {
         });
 
         SimpleScenarioStage<String, StageParams> st7 = new SimpleScenarioStage<>("7", (p) -> {
-            //if something wrong, return here
             Chat chat = p.getChat();
             TelegramBot bot = p.getBot();
             String mes = p.getMessage().text();
-
-            bot.execute(new SendMessage(chat.id(), "Вы вернулись в главное меню."));
-            goToStage("1");
-            doWork(p);
+            showMainMenu(bot, chat);
             return "2";
-
         });
 
         addStage(st1);

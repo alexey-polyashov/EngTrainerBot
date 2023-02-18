@@ -19,14 +19,38 @@ import java.util.Map;
 
 public class MyDictionarySetupScenario extends CommonScenario {
 
+    static final String msg_mydictionary_show_words = "Show words";
+    static final String msg_mydictionary_show_words_cmd = "/showwords";
+    static final String msg_mydictionary_add_word = "Add word";
+    static final String msg_mydictionary_add_word_cmd = "/add";
+    static final String msg_mydictionary_del_word = "Delete word";
+    static final String msg_mydictionary_del_word_cmd = "/del";
+    static final String msg_mydictionary_clear = "Clear";
+    static final String msg_mydictionary_clear_cmd = "/clear";
+    static final String msg_help = "Help";
+    static final String msg_help_cmd = "/help";
+    static final String msg_mainmenu = "Main menu";
+    static final String msg_mainmenu_cmd = "/mainmenu";
+    static final String msg_settings_back = "Back";
+    static final String msg_settings_back_cmd = "/back";
+
     public MyDictionarySetupScenario() {
         super();
         setScenarioId("MyDictionarySetupScenario");
     }
 
     private void showMainMenu(TelegramBot bot, Chat chat){
-        bot.execute(new SendMessage(chat.id(), "Вы находитесь в меню настройки словаря"));
-
+        Keyboard keyboard = new ReplyKeyboardMarkup(
+                new KeyboardButton(msg_mydictionary_show_words),
+                new KeyboardButton(msg_mydictionary_add_word),
+                new KeyboardButton(msg_mydictionary_del_word),
+                new KeyboardButton(msg_mydictionary_clear),
+                new KeyboardButton(msg_help),
+                new KeyboardButton(msg_mainmenu))
+                .oneTimeKeyboard(false)   // optional
+                .resizeKeyboard(true)    // optional
+                .selective(true);        // optional
+        bot.execute(new SendMessage(chat.id(),"Вы находитесь в разделе настроек своего словаря").replyMarkup(keyboard));
     }
 
     @Override
