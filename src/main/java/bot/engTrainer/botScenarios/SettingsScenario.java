@@ -15,8 +15,6 @@ import java.util.*;
 
 public class SettingsScenario extends CommonScenario {
 
-    private DictionaryService dictionaryService;
-
     static final String msg_settings_training_time = "Training intervals";
     static final String msg_settings_training_time_cmd = "/intervals";
     static final String msg_settings_intensive = "Intensity";
@@ -325,7 +323,7 @@ public class SettingsScenario extends CommonScenario {
                     .oneTimeKeyboard(false)   // optional
                     .resizeKeyboard(true)    // optional
                     .selective(true);        // optional
-            bot.execute(new SendMessage(chat.id(),"Вы находитесь в разделе настройки интервалов словарей").replyMarkup(keyboard));
+            bot.execute(new SendMessage(chat.id(),"Вы находитесь в разделе настройки словарей").replyMarkup(keyboard));
 
             return "41";
 
@@ -349,7 +347,10 @@ public class SettingsScenario extends CommonScenario {
                         bot.execute(new SendMessage(chat.id(), "<b>№" + (count++) + " - " + dict.getName() + "</b>\n" +
                                 "<u>" + dict.getDescription() + "</u>").parseMode(ParseMode.HTML));
                     }
-                    return "40";
+                    if(dicts.size()==0){
+                        bot.execute(new SendMessage(chat.id(), "У вас нет подключенных словарей"));
+                    }
+                    return "41";
                 }
                 case msg_settings_dictionaries_add:
                 case msg_settings_dictionaries_add_cmd: {
@@ -370,8 +371,8 @@ public class SettingsScenario extends CommonScenario {
 
                     return "42";
                 }
-                case msg_settings_training_time_del:
-                case msg_settings_training_time_del_cmd: {
+                case msg_settings_dictionaries_del:
+                case msg_settings_dictionaries_del_cmd: {
                     Set<Dictionaries> dicts = botUserService.getSelectedDictionaries(chat);
                     int count = 1;
                     bot.execute(new SendMessage(chat.id(), "Нажмите 'Отключить' под выбранным словарем"));
@@ -399,7 +400,7 @@ public class SettingsScenario extends CommonScenario {
                     bot.execute(new SendMessage(chat.id(), "Вы находитесь в разделе выбора словарей"));
                     bot.execute(new SendMessage(chat.id(), "Здесь вы можете посмотреть выбранные словари для изучения, подключить или отключить словаь."));
                     bot.execute(new SendMessage(chat.id(), "Из выбранных словарей, бот будет предлагать слова во время тренировок. Если нет выбранных словарей, бот будет испоьзовать все словари."));
-                    return "40";
+                    return "41";
                 default:
                     bot.execute(new SendMessage(chat.id(), "Я вас не понимаю. Выберите пункт меню."));
                     goToStage("40");
@@ -413,19 +414,24 @@ public class SettingsScenario extends CommonScenario {
 
             Chat chat = p.getChat();
             TelegramBot bot = p.getBot();
-            String mes = p.getMessage().text();
-            String[] mesParts = p.getMessage().text().split("#");
 
-            if(mes.equals(msg_settings_back) || mes.equals(msg_settings_back_cmd)){
-                goToStage("40");
-                doWork(p);
-                return "41";
-            }else if(mesParts[0].equals("plug")){
+            if(p.getMessage()!=null){
+                String mes = p.getMessage().text();
+                if(mes.equals(msg_settings_back) || mes.equals(msg_settings_back_cmd)){
+                    goToStage("40");
+                    doWork(p);
+                    return "41";
+                }
+            }
+
+            String[] mesParts = p.getRequest().getText().split("#");
+
+            if(mesParts[0].equals("plug")){
                 long id = Long.parseLong(mesParts[1]);
                 Dictionaries dict = dictionaryService.getById(id);
                 botUserService.addDictionary(chat, dict);
-                bot.execute(new SendMessage(chat.id(), "Словарь <b>'" + dict.getName() + "'</b> подключен"));
-                return "40";
+                bot.execute(new SendMessage(chat.id(), "Словарь <b>'" + dict.getName() + "'</b> подключен").parseMode(ParseMode.HTML));
+                return "41";
             }else{
                 bot.execute(new SendMessage(chat.id(), "Я вас не понимаю. Выберите словарь для подключения и нажмите кнопку под ним."));
                 return "42";
@@ -437,19 +443,24 @@ public class SettingsScenario extends CommonScenario {
 
             Chat chat = p.getChat();
             TelegramBot bot = p.getBot();
-            String mes = p.getMessage().text();
-            String[] mesParts = p.getMessage().text().split("#");
 
-            if(mes.equals(msg_settings_back) || mes.equals(msg_settings_back_cmd)){
-                goToStage("40");
-                doWork(p);
-                return "41";
-            }else if(mesParts[0].equals("unplug")){
+            if(p.getMessage()!=null){
+                String mes = p.getMessage().text();
+                if(mes.equals(msg_settings_back) || mes.equals(msg_settings_back_cmd)){
+                    goToStage("40");
+                    doWork(p);
+                    return "41";
+                }
+            }
+
+            String[] mesParts = p.getRequest().getText().split("#");
+
+            if(mesParts[0].equals("unplug")){
                 long id = Long.parseLong(mesParts[1]);
                 Dictionaries dict = dictionaryService.getById(id);
-                botUserService.delDictionary(chat, dict);
-                bot.execute(new SendMessage(chat.id(), "Словарь <b>'" + dict.getName() + "'</b> отключен"));
-                return "40";
+                botUserService.delDictionary(chat, dict.getId());
+                bot.execute(new SendMessage(chat.id(), "Словарь <b>'" + dict.getName() + "'</b> отключен").parseMode(ParseMode.HTML));
+                return "41";
             }else{
                 bot.execute(new SendMessage(chat.id(), "Я вас не понимаю. Выберите словарь для отключения и нажмите кнопку под ним."));
                 return "43";

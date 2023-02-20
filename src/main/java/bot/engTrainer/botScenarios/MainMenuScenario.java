@@ -57,15 +57,15 @@ public class MainMenuScenario extends CommonScenario {
             if(mes.equals(msg_settings) || mes.equals(msg_settings_cmd)){
                 Scenario<String, StageParams> sc = botService.startScenario("SettingsScenario", chat);
                 sc.doWork(p);
-                return null;
+                return "2";
             }else if(mes.equals(msg_select_dictionary) || mes.equals(msg_select_dictionary_cmd)){
                 Scenario<String, StageParams> sc = botService.startScenario("MyDictionarySetupScenario", chat);
                 sc.doWork(p);
-                return null;
+                return "2";
             }else if(mes.equals(msg_start_training) || mes.equals(msg_start_training_cmd)){
                 Scenario<String, StageParams> sc = botService.startScenario("TrainingScenario", chat);
                 sc.doWork(p);
-                return null;
+                return "2";
             }else if(mes.equals(msg_help) || mes.equals(msg_help_cmd)){
                 bot.execute(new SendMessage(chat.id(), "Вы находитесь в главном меню"));
                 bot.execute(new SendMessage(chat.id(), "Вы можете выполнить настройки своего профиля, подключить словари для тренировки, или начать трнировку прямо сейчас."));

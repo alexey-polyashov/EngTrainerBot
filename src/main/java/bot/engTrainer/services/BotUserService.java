@@ -177,6 +177,7 @@ public class BotUserService {
     @Transactional
     public Set<Dictionaries> getSelectedDictionaries(Chat chat){
         BotUser user = botUserRepository.findByChatId(chat.id()).orElseThrow(()-> new ResourceNotFound("Пользователь по id чата '" + chat.id() + "' не найден"));
+        user.getSelectDictionaries().size();//lazy initialization
         return user.getSelectDictionaries();
     }
 
@@ -188,9 +189,14 @@ public class BotUserService {
     }
 
     @Transactional
-    public void delDictionary(Chat chat, Dictionaries dict){
+    public void delDictionary(Chat chat, Long dictId){
         BotUser user = botUserRepository.findByChatId(chat.id()).orElseThrow(()-> new ResourceNotFound("Пользователь по id чата '" + chat.id() + "' не найден"));
-        user.getSelectDictionaries().remove(dict);
+        for(Dictionaries dict: user.getSelectDictionaries()){
+            if(dict.getId()==dictId) {
+                user.getSelectDictionaries().remove(dict);
+                break;
+            }
+        }
         botUserRepository.save(user);
     }
 

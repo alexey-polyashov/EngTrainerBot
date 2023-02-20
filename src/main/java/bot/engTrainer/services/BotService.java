@@ -36,6 +36,7 @@ public class BotService {
     private final ScenarioService scenarioService;
     private final UserStackRepository userStackRepository;
     private final BotConfig botConfig;
+    private final DictionaryService dictionaryService;
 
     private Chat currentChat;
 
@@ -59,6 +60,7 @@ public class BotService {
         sc.setBotService(this);
         sc.setScenarioService(scenarioService);
         sc.setBotUserService(botUserService);
+        sc.setDictionaryService(dictionaryService);
         scenarioStack.push(sc);
         sc.start();
         return sc;
@@ -79,6 +81,7 @@ public class BotService {
             CommonScenario comScen  = (CommonScenario )newScen;
             comScen.setScenarioService(scenarioService);
             comScen.setBotUserService(botUserService);
+            comScen.setDictionaryService(dictionaryService);
             comScen.setBotService(this);
             comScen.load(currentChat.id());
             scenarioStack.push(comScen);
