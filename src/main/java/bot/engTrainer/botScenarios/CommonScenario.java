@@ -2,41 +2,28 @@ package bot.engTrainer.botScenarios;
 
 import bot.engTrainer.exceptions.BotException;
 import bot.engTrainer.scenariodefine.simplescenario.SimpleScenario;
-import bot.engTrainer.services.BotService;
-import bot.engTrainer.services.BotUserService;
-import bot.engTrainer.services.DictionaryService;
-import bot.engTrainer.services.ScenarioService;
+import bot.engTrainer.services.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Getter
-@Setter
 public abstract class CommonScenario extends SimpleScenario<String, StageParams> {
 
     protected ScenarioService scenarioService;
     protected BotService botService;
     protected BotUserService botUserService;
     protected DictionaryService dictionaryService;
+    protected TraininigService traininigService;
 
-    public void setScenarioService(ScenarioService scenarioService){
-        this.scenarioService = scenarioService;
-    }
-
-    public void setBotService(BotService botService){
+    public void setServices(BotService botService) {
         this.botService = botService;
-    }
-
-    public void setBotUserService(BotUserService botUserService) {
-        this.botUserService = botUserService;
-    }
-
-    public void setDictionaryService(DictionaryService dictionaryService) {
-        this.dictionaryService = dictionaryService;
+        this.scenarioService = botService.getScenarioService();
+        this.botUserService = botService.getBotUserService();
+        this.dictionaryService = botService.getDictionaryService();
     }
 
     @Override

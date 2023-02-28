@@ -37,6 +37,27 @@ public class BotService {
     private final UserStackRepository userStackRepository;
     private final BotConfig botConfig;
     private final DictionaryService dictionaryService;
+    private final TraininigService traininigService;
+
+    public SimpleScManagerConfig getSimpleScManager() {
+        return simpleScManager;
+    }
+
+    public BotUserService getBotUserService() {
+        return botUserService;
+    }
+
+    public ScenarioService getScenarioService() {
+        return scenarioService;
+    }
+
+    public DictionaryService getDictionaryService() {
+        return dictionaryService;
+    }
+
+    public TraininigService getTraininigService() {
+        return traininigService;
+    }
 
     private Chat currentChat;
 
@@ -57,10 +78,7 @@ public class BotService {
     public CommonScenario startScenario(String scId, Chat chat) {
         CommonScenario sc = (CommonScenario)simpleScManager.getScenarioById(scId)
                 .orElseThrow(()->new ScenarioMissing(String.format("chat:%1$S, Не найден сценарий по id - %2$S", chat.id(), scId)));
-        sc.setBotService(this);
-        sc.setScenarioService(scenarioService);
-        sc.setBotUserService(botUserService);
-        sc.setDictionaryService(dictionaryService);
+        sc.setServices(this);
         scenarioStack.push(sc);
         sc.start();
         return sc;
@@ -79,10 +97,7 @@ public class BotService {
             Scenario<String, StageParams> newScen = simpleScManager.getScenarioById(el.getScenarioId())
                     .orElseThrow(()->new BotException("Ошибка восстановления сеанса, сценарий '" + el.getScenarioId() + "' не найден"));
             CommonScenario comScen  = (CommonScenario )newScen;
-            comScen.setScenarioService(scenarioService);
-            comScen.setBotUserService(botUserService);
-            comScen.setDictionaryService(dictionaryService);
-            comScen.setBotService(this);
+            comScen.setServices(this);
             comScen.load(currentChat.id());
             scenarioStack.push(comScen);
         }

@@ -24,13 +24,23 @@ public class TrainingBuffer {
     @ManyToOne(fetch = FetchType.EAGER)
     private Words word;
 
-    @Column(name="last_appearance")
-    private Date lastAppearance;
-
     @Column(name="count_appearance")
     private int countAppearance;
 
+    @Column(name="in_process")
+    private Boolean inProcess;
+
+    @Column
+    private Boolean processed;
+
+    @Column(name="correct_answers")
+    private Integer correctAnswers;
+
+    @Column(name="hit_number")
+    private Integer hitNumber;
+
     @Column
     private int progress;
+
 
 }

@@ -22,14 +22,17 @@ public class Words {
     @Column(name="foreign_write")
     private String foreignWrite;
 
-    @Column
+    @Column(name="transcription")
     private String transcription;
 
     @Column(name="native_write")
     private String nativeWrite;
 
-    @Column
+    @Column(name="description")
     private String description;
+
+    @Column(name="synonyms")
+    private String synonyms;
 
     @ManyToMany
     private List<Dictionaries> dictionaries;
