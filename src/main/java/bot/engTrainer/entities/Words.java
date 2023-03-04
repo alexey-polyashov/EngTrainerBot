@@ -17,7 +17,7 @@ public class Words {
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @Column(name="foreign_write")
     private String foreignWrite;

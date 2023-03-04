@@ -1,11 +1,15 @@
 package bot.engTrainer.botScenarios;
 
+import bot.engTrainer.entities.Dictionaries;
 import bot.engTrainer.helpers.NextWord;
+import bot.engTrainer.helpers.TrainingModes;
+import bot.engTrainer.helpers.TrainingSummary;
 import bot.engTrainer.scenariodefine.simplescenario.SimpleScenarioStage;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.request.Keyboard;
 import com.pengrad.telegrambot.model.request.KeyboardButton;
+import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup;
 import com.pengrad.telegrambot.request.SendMessage;
 
@@ -23,6 +27,9 @@ public class TrainingScenario extends CommonScenario {
     static final String msg_training_next_cmd = "/next";
     static final String msg_training_stop = "Stop";
     static final String msg_training_stop_cmd = "/stop";
+
+    public static final String mes_remember_new_words = "Запомните новые слова:";
+    public static final String mes_exam_words = "Проверка ранее изученного:";
 
     public TrainingScenario() {
         super();
@@ -100,18 +107,17 @@ public class TrainingScenario extends CommonScenario {
             TelegramBot bot = p.getBot();
             String mes = p.getMessage().text();
 
-            traininigService.prepareNewTraining(chat);
+            traininigService.prepareNewTraining(chat, TrainingModes.TRAINING);
 
             showTrainingMenu(bot, chat);
 
-
-            if(traininigService.newWordsContains()){
-                bot.execute(new SendMessage(chat.id(), "Запомните новые слова:"));
+            if(traininigService.isNextNewWord()){
+                bot.execute(new SendMessage(chat.id(), mes_remember_new_words));
                 goToStage("40");
                 doWork(p);
                 return "41";
             } else {
-                bot.execute(new SendMessage(chat.id(), "Проверка ранее изученного:"));
+                bot.execute(new SendMessage(chat.id(), mes_exam_words));
                 showWordWithVariants(bot, chat);
                 goToStage("50");
                 doWork(p);
@@ -128,14 +134,26 @@ public class TrainingScenario extends CommonScenario {
 
             showTrainingMenu(bot, chat);
 
-            if(traininigService.newWordsContains()){
+            if(traininigService.isNextNewWord()){
                 showNewWord(bot, chat);
                 return "41";
-            } else {
-                bot.execute(new SendMessage(chat.id(), "Проверка ранее изученного:"));
+            }else if(traininigService.isNextExamWord()){
+                bot.execute(new SendMessage(chat.id(), mes_exam_words));
                 goToStage("50");
                 doWork(p);
                 return "51";
+            } else {
+                showTrainingMenu(bot, chat);
+                bot.execute(new SendMessage(chat.id(), "Тренировка закончена"));
+                bot.execute(new SendMessage(chat.id(), "Итоги тренировки:"));
+                TrainingSummary ts = traininigService.getSummary();
+                if(ts.getNewWords()>0) {
+                    bot.execute(new SendMessage(chat.id(), "Выучено новых слов - " + ts.getNewWords()));
+                }
+                if(ts.getStudyWords()>0) {
+                    bot.execute(new SendMessage(chat.id(), "Пвторено слов - " + ts.getStudyWords()));
+                }
+                return null;
             }
 
         });
@@ -149,10 +167,10 @@ public class TrainingScenario extends CommonScenario {
             switch (mes) {
                 case msg_training_next:
                 case msg_training_next_cmd:
-                    traininigService.learnNewWord(chat);
+                    traininigService.goToNextWord(chat);
                     goToStage("40");
                     doWork(p);
-                    return "41";
+                    return getCurrentStage().getIdentifier();
                 case msg_training_stop:
                 case msg_training_stop_cmd:
                     return null;
@@ -182,6 +200,63 @@ public class TrainingScenario extends CommonScenario {
 
         });
 
+        SimpleScenarioStage<String, StageParams> st51 = new SimpleScenarioStage<>("51", (p) -> {
+
+            Chat chat = p.getChat();
+            TelegramBot bot = p.getBot();
+
+            if(p.getMessage()!=null){
+                String mes = p.getMessage().text();
+                switch (mes) {
+                    case msg_training_next:
+                    case msg_training_next_cmd:
+                        traininigService.goToNextWord(chat);
+                        goToStage("40");
+                        doWork(p);
+                        return getCurrentStage().getIdentifier();
+                    case msg_training_stop:
+                    case msg_training_stop_cmd:
+                        return null;
+                    case msg_help:
+                    case msg_help_cmd:
+                        bot.execute(new SendMessage(chat.id(), "Вы находитесь в режиме треннировки"));
+                        bot.execute(new SendMessage(chat.id(), "Сейчас вам показыватся слова пройденный ранее слова для пвторения."));
+                        bot.execute(new SendMessage(chat.id(), "Тренировка будет закончена пока вы не дадите правильный ответ по каждому слову."));
+                        bot.execute(new SendMessage(chat.id(), "Вам нужно выбирать правильные варианты перевода. Если выбрать вариант затруднительно, то можно перейти к следующему слову нажав Next, позде это слово появится снова"));
+                        bot.execute(new SendMessage(chat.id(), "Для остановки и взврата в главное меню нажмите кнопку Stop"));
+                        return "51";
+                    default:
+                        bot.execute(new SendMessage(chat.id(), "Я не понимаю"));
+                        bot.execute(new SendMessage(chat.id(), "Выберите вариант перевода, нажмите Next для перехода к следующему слову, или Stop для возврата в главное меню."));
+                        goToStage("40");
+                        doWork(p);
+                        return "51";
+                }
+            }
+
+            String[] mesParts = p.getRequest().getText().split("#");
+
+            if(mesParts[0].equals("variant")){
+                String label = mesParts[1];
+                if(label.equals("right")){
+                    bot.execute(new SendMessage(chat.id(), "Правильный ответ :)").parseMode(ParseMode.HTML));
+                    traininigService.acceptCorrectAnswer(chat);
+                }else{
+                    bot.execute(new SendMessage(chat.id(), "Неправильно :(").parseMode(ParseMode.HTML));
+                    traininigService.acceptWrongAnswer(chat);
+                }
+                goToStage("40");
+                doWork(p);
+                return getCurrentStage().getIdentifier();
+            }else{
+                goToStage("40");
+                doWork(p);
+                return getCurrentStage().getIdentifier();
+            }
+
+        });
+
+
 
         addStage(st1);
         addStage(st2);
@@ -189,12 +264,13 @@ public class TrainingScenario extends CommonScenario {
         addStage(st40);
         addStage(st41);
         addStage(st50);
+        addStage(st51);
 
     }
 
     private void showWordWithVariants(TelegramBot bot, Chat chat){
 
-        NextWord nw = traininigService.getNextWord(chat);
+        NextWord nw = traininigService.getNextExamWord(chat);
         if(nw == null){
             return;
         }
@@ -203,7 +279,7 @@ public class TrainingScenario extends CommonScenario {
 
     private void showNewWord(TelegramBot bot, Chat chat){
 
-        NextWord nw = traininigService.getNextWord(chat);
+        NextWord nw = traininigService.getNextNewWord(chat);
         if(nw == null){
             return;
         }

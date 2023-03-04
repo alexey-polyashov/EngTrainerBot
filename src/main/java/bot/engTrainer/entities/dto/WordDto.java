@@ -10,8 +10,11 @@ import lombok.Setter;
 @NoArgsConstructor
 public class WordDto {
 
+    private Integer id;
     private String foreign_write;
     private String transcription;
     private String native_write;
+    private String synonyms;
+    private String description;
 
 }

@@ -476,7 +476,7 @@ public class SettingsScenario extends CommonScenario {
             Chat chat = p.getChat();
             TelegramBot bot = p.getBot();
             String mes = p.getMessage().text();
-            Optional<BotUser> botUser = botUserService.getUserByChat(chat);
+            BotUser botUser = botUserService.getUserByChat(chat);
             bot.execute(new SendMessage(chat.id(), "Вы в разделе настройки интенсивности тренировок"));
             Keyboard keyboard = new ReplyKeyboardMarkup(
                     new KeyboardButton(msg_settings_back)
@@ -484,12 +484,8 @@ public class SettingsScenario extends CommonScenario {
                 .oneTimeKeyboard(false)   // optional
                 .resizeKeyboard(true)    // optional
                 .selective(true);        // optional
-            if(botUser.isPresent()){
-                bot.execute(new SendMessage(chat.id(),"Ваша текущая интенсивность тренировок - " + botUser.get().getTrainigIntensity() + " слов в день").replyMarkup(keyboard));
-                bot.execute(new SendMessage(chat.id(),"Для изменения введите целое число в диапазоне от 1 до 50, равное количеству слов в день, которое вы хотите изучать. Для отмены изменений вернитесь назад.").replyMarkup(keyboard));
-            }else{
-                bot.execute(new SendMessage(chat.id(),"Ошибка! Вашего аккаунта нет в базе").replyMarkup(keyboard));
-            }
+            bot.execute(new SendMessage(chat.id(),"Ваша текущая интенсивность тренировок - " + botUser.getTrainigIntensity() + " слов в день").replyMarkup(keyboard));
+            bot.execute(new SendMessage(chat.id(),"Для изменения введите целое число в диапазоне от 1 до 50, равное количеству слов в день, которое вы хотите изучать. Для отмены изменений вернитесь назад.").replyMarkup(keyboard));
 
             return "51";
 
@@ -516,13 +512,10 @@ public class SettingsScenario extends CommonScenario {
                         return "51";
                     }
                 }
-                Optional<BotUser> botUser = botUserService.getUserByChat(chat);
-                if(botUser.isPresent()){
-                    BotUser entity = botUser.get();
-                    entity.setTrainigIntensity(intensity);
-                    botUserService.saveBotUser(entity);
-                    bot.execute(new SendMessage(chat.id(), "Установлена интенсивность тренировок - " + intensity));
-                }
+                BotUser botUser = botUserService.getUserByChat(chat);
+                botUser.setTrainigIntensity(intensity);
+                botUserService.saveBotUser(botUser);
+                bot.execute(new SendMessage(chat.id(), "Установлена интенсивность тренировок - " + intensity));
                 goToStage("1");
                 doWork(p);
                 return "2";

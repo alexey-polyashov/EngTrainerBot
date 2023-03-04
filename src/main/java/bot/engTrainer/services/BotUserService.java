@@ -39,10 +39,6 @@ public class BotUserService {
 
 
     public BotUserDto registerNewUser(Chat chat, String name, String email){
-        Optional<BotUser> botUser = getUserByChat(chat);
-        if(botUser.isPresent()){
-            return botUserMapper.toDto(botUser.get());
-        }
         BotUser newUser = new BotUser();
         List<Roles> roles = new ArrayList<>();
         roles.add(roleRepository.findByName("USER").orElseThrow(()->new ResourceNotFound("Роль USER не найдена")));
@@ -68,8 +64,13 @@ public class BotUserService {
         return botUser;
     }
 
-    public Optional<BotUser> getUserByChat(Chat chat){
-        return botUserRepository.findByChatId(chat.id());
+    public BotUser getUserByChat(Chat chat){
+        return botUserRepository.findByChatId(chat.id())
+                .orElseThrow(()->new ResourceNotFound("Пользователь с id '" + chat.id() + "' не найден"));
+    }
+
+    public boolean userByChatExists(Chat chat){
+        return botUserRepository.findByChatId(chat.id()).isPresent();
     }
 
     @Transactional
