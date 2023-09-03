@@ -25,13 +25,13 @@ public class TrainingProgress {
     @ManyToOne(fetch = FetchType.EAGER)
     private Words word;
 
-    @Column(name="last_appearance")
-    private Date lastAppearance;
+    @Column(name="last_appearance_date")
+    private Date lastAppearanceDate;
 
-    @Column(name="count_appearance")
-    private int countAppearance;
+    @Column(name="learning_interval")
+    private Integer learningInterval; // 1- 15 minutes, 2- 8 hours, 3- 24 hours, 4- 2 weeks
 
     @Column
-    private int progress;
+    private Integer progress; //count of success answer on each interval, min-0, max-3
 
 }

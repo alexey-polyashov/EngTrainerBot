@@ -79,6 +79,7 @@ public class TrainingScenario extends CommonScenario {
             switch (mes) {
                 case msg_training_ready:
                 case msg_training_ready_cmd:
+                    traininigService.isNextNewWord();
                     goToStage("30");
                     doWork(p);
                     return "30";
@@ -105,7 +106,6 @@ public class TrainingScenario extends CommonScenario {
 
             Chat chat = p.getChat();
             TelegramBot bot = p.getBot();
-            String mes = p.getMessage().text();
 
             traininigService.prepareNewTraining(chat, TrainingModes.TRAINING);
 
@@ -130,7 +130,6 @@ public class TrainingScenario extends CommonScenario {
 
             Chat chat = p.getChat();
             TelegramBot bot = p.getBot();
-            String mes = p.getMessage().text();
 
             showTrainingMenu(bot, chat);
 
@@ -192,7 +191,6 @@ public class TrainingScenario extends CommonScenario {
 
             Chat chat = p.getChat();
             TelegramBot bot = p.getBot();
-            String mes = p.getMessage().text();
 
             showTrainingMenu(bot, chat);
             showWordWithVariants(bot, chat);

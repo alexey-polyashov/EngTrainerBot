@@ -12,6 +12,9 @@ import java.util.Set;
 public class NextWord {
     private String foreignWriting;
     private String transcription;
+    private String description;
     private Set<String> variants;
     private Set<String> examples;
+
+
 }
