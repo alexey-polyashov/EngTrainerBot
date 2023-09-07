@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +29,10 @@ public class TraininigService {
     private final BotUserService botUserService;
     private final DictionaryService dictionaryService;
     private final WordsMapper wordsMapper;
+
+    public Set<TrainingBufferDto> getTrainingBuffer(Long UserId){
+        return trainingBufferRepository.findByUserId(UserId).stream().map(trainingBufferMapper::toDto).collect(Collectors.toSet());
+    }
 
     private boolean timeToShow(TrainingProgressDto curProgress){
         boolean retVal = false;
@@ -117,12 +122,22 @@ public class TraininigService {
 
     }
 
-    public boolean isNextNewWord(){
-        return true;
+    public boolean isNextNewWord(Set<TrainingBufferDto> trainingBufferDtoSet){
+        for (TrainingBufferDto tbDto: trainingBufferDtoSet) {
+            if(tbDto.getWordState() == WordState.NEW.ordinal()){
+                return true;
+            }
+        }
+        return false;
     }
 
-    public boolean isNextExamWord(){
-        return true;
+    public boolean isNextExamWord(Set<TrainingBufferDto> trainingBufferDtoSet){
+        for (TrainingBufferDto tbDto: trainingBufferDtoSet) {
+            if(tbDto.getWordState() != WordState.NEW.ordinal()){
+                return true;
+            }
+        }
+        return false;
     }
 
     public TrainingSummary getSummary() {
@@ -145,17 +160,17 @@ public class TraininigService {
     }
 
     public NextWord getNextExamWord(Chat chat) {
-        TrainingBuffer chosenWord = trainingBufferRepository.getNextExamWord();
+        TrainingBuffer chosenWord = trainingBufferRepository.getNextExamWord(chat.id());
         return NextWord.builder()
                 .foreignWriting(chosenWord.getWord().getForeignWrite())
                 .transcription(chosenWord.getWord().getTranscription())
                 .description(chosenWord.getWord().getDescription())
-                .variants(trainingBufferRepository.getAnswerVariants(chosenWord.getWord()))
+                .variants(trainingBufferRepository.getAnswerVariants(chat.id()))
                 .build();
     }
 
     public NextWord getNextNewWord(Chat chat) {
-        TrainingBuffer chosenWord = trainingBufferRepository.getNextNewWord();
+        TrainingBuffer chosenWord = trainingBufferRepository.getNextNewWord(chat.id());
         return NextWord.builder()
                 .foreignWriting(chosenWord.getWord().getForeignWrite())
                 .transcription(chosenWord.getWord().getTranscription())

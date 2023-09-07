@@ -1,6 +1,7 @@
 package bot.engTrainer.botScenarios;
 
 import bot.engTrainer.entities.Dictionaries;
+import bot.engTrainer.entities.dto.TrainingBufferDto;
 import bot.engTrainer.helpers.NextWord;
 import bot.engTrainer.helpers.TrainingModes;
 import bot.engTrainer.helpers.TrainingSummary;
@@ -13,6 +14,7 @@ import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup;
 import com.pengrad.telegrambot.request.SendMessage;
 
+import java.util.Set;
 
 
 public class TrainingScenario extends CommonScenario {
@@ -30,6 +32,8 @@ public class TrainingScenario extends CommonScenario {
 
     public static final String mes_remember_new_words = "Запомните новые слова:";
     public static final String mes_exam_words = "Проверка ранее изученного:";
+
+    private Set<TrainingBufferDto> trainingBuffer;
 
     public TrainingScenario() {
         super();
@@ -133,10 +137,12 @@ public class TrainingScenario extends CommonScenario {
 
             showTrainingMenu(bot, chat);
 
-            if(traininigService.isNextNewWord()){
+            trainingBuffer = traininigService.getTrainingBuffer(chat.id());
+
+            if(traininigService.isNextNewWord(trainingBuffer)){
                 showNewWord(bot, chat);
                 return "41";
-            }else if(traininigService.isNextExamWord()){
+            }else if(traininigService.isNextExamWord(trainingBuffer)){
                 bot.execute(new SendMessage(chat.id(), mes_exam_words));
                 goToStage("50");
                 doWork(p);
