@@ -190,8 +190,14 @@ public class TraininigService {
                 .foreignWriting(selectedWord.getWord().getForeignWrite())
                 .transcription(selectedWord.getWord().getTranscription())
                 .description(selectedWord.getWord().getDescription())
-                .variants(trainingBufferRepository.getAnswerVariants(chat.id()))
+                .variants(getAnswerVariants(chat))
                 .build();
+    }
+
+    public Set<String> getAnswerVariants(Chat chat){
+        Set<String> variants = new HashSet<>();
+
+        return variants;
     }
 
     public NextWord getNextNewWord(Chat chat, Set<TrainingBufferDto> trainingBufferDtoSet) {
