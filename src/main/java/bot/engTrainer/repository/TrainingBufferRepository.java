@@ -14,10 +14,4 @@ public interface TrainingBufferRepository extends JpaRepository<TrainingBuffer, 
     void deleteByUserId(Long userId);
     Set<TrainingBuffer> findByUserId(Long userId);
 
-    @Query
-    TrainingBuffer getNextExamWord(Long userId);
-
-    Set<String> getAnswerVariants(Long userId);
-
-    TrainingBuffer getNextNewWord(Long userId);
 }

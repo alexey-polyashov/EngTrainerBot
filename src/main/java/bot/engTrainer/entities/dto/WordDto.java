@@ -11,9 +11,9 @@ import lombok.Setter;
 public class WordDto {
 
     private Integer id;
-    private String foreign_write;
+    private String foreignWrite;
     private String transcription;
-    private String native_write;
+    private String nativeWrite;
     private String synonyms;
     private String description;
 

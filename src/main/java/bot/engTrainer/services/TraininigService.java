@@ -122,6 +122,13 @@ public class TraininigService {
 
     }
 
+    public boolean isNextWord(Set<TrainingBufferDto> trainingBufferDtoSet){
+        if(trainingBufferDtoSet.size()>0) {
+              return true;
+        }
+        return false;
+    }
+
     public boolean isNextNewWord(Set<TrainingBufferDto> trainingBufferDtoSet){
         for (TrainingBufferDto tbDto: trainingBufferDtoSet) {
             if(tbDto.getWordState() == WordState.NEW.ordinal()){
@@ -149,32 +156,55 @@ public class TraininigService {
 
     public void goToNextWord(Chat chat) {
 
+        //got to next new word which didn't has been processed yet
+        //if such word didn't find out, look for exam word which not has been processed yet
+        //if such word didn't find out, look for exam words with progress < 1
+
     }
 
     public void acceptCorrectAnswer(Chat chat) {
+
+        //find current word (flag inProcess is set )
+        //increase the 'progress' field by one
 
     }
 
     public void acceptWrongAnswer(Chat chat) {
 
+        //find current word (flag inProcess is set )
+        //decrease the 'progress' field by one
+
     }
 
-    public NextWord getNextExamWord(Chat chat) {
-        TrainingBuffer chosenWord = trainingBufferRepository.getNextExamWord(chat.id());
+    public NextWord getNextExamWord(Chat chat, Set<TrainingBufferDto> trainingBufferDtoSet) {
+        TrainingBufferDto selectedWord = null;
+        for (TrainingBufferDto tbDto: trainingBufferDtoSet) {
+            if(tbDto.getWordState() != WordState.NEW.ordinal()){
+                selectedWord = tbDto;
+            }
+        }
+        if(selectedWord==null){
+            return null;
+        }
         return NextWord.builder()
-                .foreignWriting(chosenWord.getWord().getForeignWrite())
-                .transcription(chosenWord.getWord().getTranscription())
-                .description(chosenWord.getWord().getDescription())
+                .foreignWriting(selectedWord.getWord().getForeignWrite())
+                .transcription(selectedWord.getWord().getTranscription())
+                .description(selectedWord.getWord().getDescription())
                 .variants(trainingBufferRepository.getAnswerVariants(chat.id()))
                 .build();
     }
 
-    public NextWord getNextNewWord(Chat chat) {
-        TrainingBuffer chosenWord = trainingBufferRepository.getNextNewWord(chat.id());
+    public NextWord getNextNewWord(Chat chat, Set<TrainingBufferDto> trainingBufferDtoSet) {
+        TrainingBufferDto selectedWord = null;
+        for (TrainingBufferDto tbDto: trainingBufferDtoSet) {
+            if(tbDto.getWordState() != WordState.NEW.ordinal()){
+                selectedWord = tbDto;
+            }
+        }
         return NextWord.builder()
-                .foreignWriting(chosenWord.getWord().getForeignWrite())
-                .transcription(chosenWord.getWord().getTranscription())
-                .description(chosenWord.getWord().getDescription())
+                .foreignWriting(selectedWord.getWord().getForeignWrite())
+                .transcription(selectedWord.getWord().getTranscription())
+                .description(selectedWord.getWord().getDescription())
                 .build();
     }
 }

@@ -32,6 +32,6 @@ public class TrainingProgress {
     private Integer learningInterval; // 1- 15 minutes, 2- 8 hours, 3- 24 hours, 4- 2 weeks
 
     @Column
-    private Integer progress; //count of success answer on each interval, min-0, max-3
+    private Integer progress; //count of success answer on each interval, min-0, max-1
 
 }
