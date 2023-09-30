@@ -13,5 +13,4 @@ public interface BotUserRepository extends JpaRepository<BotUser, Long> {
     Optional<BotUser> findByName(String identifier);
     Optional<BotUser> findByChatId(Long chatId);
 
-
 }

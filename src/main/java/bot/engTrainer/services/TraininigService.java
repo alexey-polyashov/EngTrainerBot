@@ -2,15 +2,16 @@ package bot.engTrainer.services;
 
 import bot.engTrainer.entities.BotUser;
 import bot.engTrainer.entities.Dictionaries;
-import bot.engTrainer.entities.TrainingBuffer;
 import bot.engTrainer.entities.Words;
 import bot.engTrainer.entities.dto.TrainingBufferDto;
 import bot.engTrainer.entities.dto.TrainingProgressDto;
+import bot.engTrainer.entities.dto.WordDto;
 import bot.engTrainer.entities.mappers.TrainingBufferMapper;
 import bot.engTrainer.entities.mappers.WordsMapper;
 import bot.engTrainer.helpers.*;
 import bot.engTrainer.repository.TrainingBufferRepository;
 import bot.engTrainer.repository.TrainingProgressRepository;
+import bot.engTrainer.repository.WordsRepository;
 import com.pengrad.telegrambot.model.Chat;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,7 @@ public class TraininigService {
     private final TrainingProgressRepository trainingProgressRepository;
     private final TrainingBufferMapper trainingBufferMapper;
     private final BotUserService botUserService;
-    private final DictionaryService dictionaryService;
+    private final WordsRepository wordsRepository;
     private final WordsMapper wordsMapper;
 
     public Set<TrainingBufferDto> getTrainingBuffer(Long UserId){
@@ -123,10 +124,7 @@ public class TraininigService {
     }
 
     public boolean isNextWord(Set<TrainingBufferDto> trainingBufferDtoSet){
-        if(trainingBufferDtoSet.size()>0) {
-              return true;
-        }
-        return false;
+        return trainingBufferDtoSet.size() > 0;
     }
 
     public boolean isNextNewWord(Set<TrainingBufferDto> trainingBufferDtoSet){
@@ -187,17 +185,18 @@ public class TraininigService {
             return null;
         }
         return NextWord.builder()
-                .foreignWriting(selectedWord.getWord().getForeignWrite())
+                .translate(selectedWord.getWord().getForeignWrite())
                 .transcription(selectedWord.getWord().getTranscription())
                 .description(selectedWord.getWord().getDescription())
                 .variants(getAnswerVariants(chat))
                 .build();
     }
 
-    public Set<String> getAnswerVariants(Chat chat){
-        Set<String> variants = new HashSet<>();
-
-        return variants;
+    public Set<WordDto> getAnswerVariants(Chat chat){
+        Set<Words> variants = wordsRepository.findRandomByDictionary(chat.id(), 3);
+        return variants.stream()
+                .map(wordsMapper::toDto)
+                .collect(Collectors.toSet());
     }
 
     public NextWord getNextNewWord(Chat chat, Set<TrainingBufferDto> trainingBufferDtoSet) {
@@ -208,7 +207,7 @@ public class TraininigService {
             }
         }
         return NextWord.builder()
-                .foreignWriting(selectedWord.getWord().getForeignWrite())
+                .translate(selectedWord.getWord().getForeignWrite())
                 .transcription(selectedWord.getWord().getTranscription())
                 .description(selectedWord.getWord().getDescription())
                 .build();

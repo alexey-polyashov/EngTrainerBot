@@ -1,18 +1,15 @@
 package bot.engTrainer.botScenarios;
 
-import bot.engTrainer.entities.Dictionaries;
 import bot.engTrainer.entities.dto.TrainingBufferDto;
 import bot.engTrainer.entities.dto.WordDto;
+import bot.engTrainer.helpers.ExamType;
 import bot.engTrainer.helpers.NextWord;
 import bot.engTrainer.helpers.TrainingModes;
 import bot.engTrainer.helpers.TrainingSummary;
 import bot.engTrainer.scenariodefine.simplescenario.SimpleScenarioStage;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Chat;
-import com.pengrad.telegrambot.model.request.Keyboard;
-import com.pengrad.telegrambot.model.request.KeyboardButton;
-import com.pengrad.telegrambot.model.request.ParseMode;
-import com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup;
+import com.pengrad.telegrambot.model.request.*;
 import com.pengrad.telegrambot.request.SendMessage;
 
 import java.util.Set;
@@ -133,7 +130,7 @@ public class TrainingScenario extends CommonScenario {
                 return "41";
             } else if (traininigService.isNextExamWord(trainingBuffer)) {
                 bot.execute(new SendMessage(chat.id(), mes_exam_words));
-                showWordWithVariants(bot, chat);
+                showWordWithVariants(bot, chat, ExamType.TRANSLATE);
                 goToStage("50");
                 doWork(p);
                 return "51";
@@ -163,7 +160,7 @@ public class TrainingScenario extends CommonScenario {
             trainingBuffer = traininigService.getTrainingBuffer(chat.id());
 
             if(traininigService.isNextNewWord(trainingBuffer)){
-                showNewWord(bot, chat, trainingBuffer);
+                showNewWord(bot, chat);
                 return "41";
             }else {
                 goToStage("30");
@@ -214,7 +211,7 @@ public class TrainingScenario extends CommonScenario {
             trainingBuffer = traininigService.getTrainingBuffer(chat.id());
 
             if(traininigService.isNextExamWord(trainingBuffer)){
-                showWordWithVariants(bot, chat, trainingBuffer);
+                showWordWithVariants(bot, chat, ExamType.TRANSLATE);
                 return "51";
             }else {
                 goToStage("30");
@@ -312,21 +309,46 @@ public class TrainingScenario extends CommonScenario {
 
     }
 
-    private void showWordWithVariants(TelegramBot bot, Chat chat){
+    private void showWordWithVariants(TelegramBot bot, Chat chat, ExamType examType){
 
-        NextWord nw = traininigService.getNextExamWord(chat);
+        NextWord nw = traininigService.getNextExamWord(chat, this.trainingBuffer);
         if(nw == null){
             return;
+        }
+
+        /*
+         if examType == ExamType.TRANSLATE
+               1. send a word with the original spelling
+               2. send inline buttons with random translation variants
+         if examType == ExamType.NATIVE
+               1. send a word with the translation
+               2. send inline buttons with random variants of original spelling
+         */
+        if(examType==ExamType.TRANSLATE){
+            bot.execute(new SendMessage(chat.id(), nw.getNativeWriting()));
+            for (WordDto wordDto: nw.getVariants()){
+                InlineKeyboardButton keyLine = new InlineKeyboardButton(wordDto.getForeignWrite()).callbackData("variant#" + wordDto.getId());
+                bot.execute(new SendMessage(chat.id(), "").parseMode(ParseMode.HTML).replyMarkup(new InlineKeyboardMarkup(keyLine)));
+            }
+        }else{
+            bot.execute(new SendMessage(chat.id(), nw.getTranslate()));
+            for (WordDto wordDto: nw.getVariants()){
+                InlineKeyboardButton keyLine = new InlineKeyboardButton(wordDto.getNativeWrite()).callbackData("variant#" + wordDto.getId());
+                bot.execute(new SendMessage(chat.id(), "").parseMode(ParseMode.HTML).replyMarkup(new InlineKeyboardMarkup(keyLine)));
+            }
         }
 
     }
 
     private void showNewWord(TelegramBot bot, Chat chat){
 
-        NextWord nw = traininigService.getNextNewWord(chat);
+        NextWord nw = traininigService.getNextNewWord(chat, this.trainingBuffer);
         if(nw == null){
             return;
         }
+        /*
+          1. send a word with the original spelling and translation
+         */
         bot.execute(new SendMessage(chat.id(), ""));
 
     }
